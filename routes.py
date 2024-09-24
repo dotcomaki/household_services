@@ -2,7 +2,10 @@ print("routes.py is being imported")
 
 from flask import render_template, redirect, url_for, flash, request
 from app import app, db
-from forms import LoginForm, RegistrationForm, ServiceForm, ServiceRequestForm, SearchForm
+from forms import (
+    LoginForm, RegistrationForm, ServiceForm, ServiceRequestForm,
+    SearchForm, EditUserForm
+)
 from models import User, Service, ServiceRequest
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -71,13 +74,14 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-# Admin Dashboard
+# Admin Dashboard Route
 @app.route('/admin/dashboard')
 @login_required
 def admin_dashboard():
     if current_user.role != 'admin':
         flash('Access denied.')
         return redirect(url_for('index'))
+
     services = Service.query.all()
     return render_template('admin_dashboard.html', services=services)
 
@@ -171,3 +175,87 @@ def request_service(service_id):
     db.session.commit()
     flash('Service request created.')
     return redirect(url_for('customer_dashboard'))
+
+# Manage Users Route
+@app.route('/admin/manage_users')
+@login_required
+def manage_users():
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    users = User.query.all()
+    return render_template('manage_users.html', users=users)
+
+# Edit User Route
+@app.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def edit_user(user_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    user = User.query.get_or_404(user_id)
+    form = EditUserForm(obj=user)
+
+    if form.validate_on_submit():
+        user.username = form.username.data
+        user.role = form.role.data
+        # Update password if provided
+        if form.password.data:
+            user.password = generate_password_hash(form.password.data)
+        db.session.commit()
+        flash('User updated successfully.')
+        return redirect(url_for('manage_users'))
+
+    return render_template('edit_user.html', form=form, user=user)
+
+# Delete User Route
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash('User deleted successfully.')
+    return redirect(url_for('manage_users'))
+
+# Edit Service Route
+@app.route('/admin/edit_service/<int:service_id>', methods=['GET', 'POST'])
+@login_required
+def edit_service(service_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    service = Service.query.get_or_404(service_id)
+    form = ServiceForm(obj=service)
+
+    if form.validate_on_submit():
+        service.name = form.name.data
+        service.base_price = form.base_price.data
+        service.time_required = form.time_required.data
+        service.description = form.description.data
+        db.session.commit()
+        flash('Service updated successfully.')
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('edit_service.html', form=form, service=service)
+
+# Delete Service Route
+@app.route('/admin/delete_service/<int:service_id>', methods=['POST'])
+@login_required
+def delete_service(service_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    service = Service.query.get_or_404(service_id)
+    db.session.delete(service)
+    db.session.commit()
+    flash('Service deleted successfully.')
+    return redirect(url_for('admin_dashboard'))

@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Admin Dashboard</h2>
-<p>
-    <a href="{{ url_for('create_service') }}" class="btn btn-success">Create New Service</a>
-    <a href="{{ url_for('manage_users') }}" class="btn btn-primary">Manage Users</a>
+<div class="container mt-4">
+    <h1>Admin Dashboard</h1>
+    <hr>
+    <div class="mb-3">
+        <a href="{{ url_for('create_service') }}" class="btn btn-primary">Create Service</a>
+        <a href="{{ url_for('manage_users') }}" class="btn btn-primary">Manage Users</a>
     <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
-</p>
+    </div>
 <hr>
 <h3>All Services</h3>
 <table class="table table-striped">

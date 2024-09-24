@@ -1,6 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, IntegerField
-from wtforms.validators import DataRequired, EqualTo
+from wtforms import (
+    StringField, PasswordField, SubmitField, SelectField, IntegerField,
+    TextAreaField
+)
+from wtforms.validators import DataRequired, Length, EqualTo, Optional
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -30,3 +33,13 @@ class ServiceRequestForm(FlaskForm):
 class SearchForm(FlaskForm):
     search_query = StringField('Search', validators=[DataRequired()])
     submit = SubmitField('Search')
+
+class EditUserForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=100)])
+    password = PasswordField('New Password', validators=[Optional()])
+    confirm_password = PasswordField('Confirm New Password', validators=[
+        Optional(),
+        EqualTo('password', message='Passwords must match.')
+    ])
+    role = SelectField('Role', choices=[('admin', 'Admin'), ('professional', 'Professional'), ('customer', 'Customer')], validators=[DataRequired()])
+    submit = SubmitField('Update User')

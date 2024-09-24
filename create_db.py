@@ -1,6 +1,7 @@
 # create_db.py
 
-from app import app, db
+from app import app
+from extensions import db
 import models  # Ensure models are imported so SQLAlchemy knows about them
 
 def create_database():
