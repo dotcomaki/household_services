@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Customer Dashboard</h2>
+<p>
+    <a href="{{ url_for('search_services') }}" class="btn btn-primary">Search Services</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+</p>
+<hr>
+<h3>Your Service Requests</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Service</th>
+            <th>Professional</th>
+            <th>Status</th>
+            <th>Date Requested</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for request in service_requests %}
+        <tr>
+            <td>{{ request.id }}</td>
+            <td>{{ request.service.name }}</td>
+            <td>
+                {% if request.professional %}
+                {{ request.professional.username }}
+                {% else %}
+                Pending Assignment
+                {% endif %}
+            </td>
+            <td>{{ request.service_status }}</td>
+            <td>{{ request.date_of_request.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+                {% if request.service_status != 'closed' %}
+                <a href="{{ url_for('cancel_request', request_id=request.id) }}" class="btn btn-sm btn-danger">Cancel</a>
+                {% else %}
+                <span class="text-success">Completed</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
