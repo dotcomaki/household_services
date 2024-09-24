@@ -31,7 +31,7 @@ class ServiceRequestForm(FlaskForm):
     submit = SubmitField('Request Service')
 
 class SearchForm(FlaskForm):
-    search_query = StringField('Search', validators=[DataRequired()])
+    search_term = StringField('Search', validators=[DataRequired()])
     submit = SubmitField('Search')
 
 class EditUserForm(FlaskForm):

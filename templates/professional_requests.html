@@ -1,34 +1,43 @@
+<!-- templates/professional_requests.html -->
+
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Available Service Requests</h2>
-<p>
-    <a href="{{ url_for('professional_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
-</p>
-<hr>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Service</th>
-            <th>Customer</th>
-            <th>Date Requested</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for request in requests %}
-        <tr>
-            <td>{{ request.id }}</td>
-            <td>{{ request.service.name }}</td>
-            <td>{{ request.customer.username }}</td>
-            <td>{{ request.date_of_request.strftime('%Y-%m-%d %H:%M') }}</td>
-            <td>
-                <a href="{{ url_for('accept_request', request_id=request.id) }}" class="btn btn-sm btn-primary">Accept</a>
-                <a href="{{ url_for('reject_request', request_id=request.id) }}" class="btn btn-sm btn-danger">Reject</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container mt-4">
+    <h1>Available Service Requests</h1>
+    {% if requests %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Service Name</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in requests %}
+            <tr>
+                <td>{{ request.service.name }}</td>
+                <td>{{ request.customer.username }}</td>
+                <td>{{ request.service_status }}</td>
+                <td>
+                    {% if request.service_status == 'requested' %}
+                    <a href="{{ url_for('accept_request', request_id=request.id) }}" class="btn btn-sm btn-success">Accept</a>
+                    {% elif request.service_status == 'assigned' and request.professional_id == current_user.id %}
+                    <form action="{{ url_for('accept_request', request_id=request.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                    </form>
+                    {% else %}
+                    <span>N/A</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No service requests available at the moment.</p>
+    {% endif %}
+</div>
 {% endblock %}

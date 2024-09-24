@@ -126,13 +126,18 @@ def view_requests():
     return render_template('professional_requests.html', requests=requests)
 
 # Accept Request Route
-@app.route('/professional/accept_request/<int:request_id>')
+@app.route('/professional/accept_request/<int:request_id>', methods=['POST'])
 @login_required
 def accept_request(request_id):
     if current_user.role != 'professional':
         flash('Access denied.')
         return redirect(url_for('index'))
-    service_request = ServiceRequest.query.get(request_id)
+
+    service_request = ServiceRequest.query.get_or_404(request_id)
+    if service_request.service_status != 'requested':
+        flash('This request is not available.')
+        return redirect(url_for('view_requests'))
+
     service_request.professional_id = current_user.id
     service_request.service_status = 'assigned'
     db.session.commit()
@@ -155,8 +160,16 @@ def search_services():
     if current_user.role != 'customer':
         flash('Access denied.')
         return redirect(url_for('index'))
+
+    form = SearchForm()
     services = Service.query.all()
-    return render_template('search_services.html', services=services)
+
+    if form.validate_on_submit():
+        search_term = form.search_term.data
+        # Modify the query to filter based on the search term
+        services = Service.query.filter(Service.name.ilike(f'%{search_term}%')).all()
+
+    return render_template('search_services.html', services=services, form=form)
 
 # Create Service Request
 @app.route('/customer/request_service/<int:service_id>', methods=['GET', 'POST'])
@@ -259,3 +272,22 @@ def delete_service(service_id):
     db.session.commit()
     flash('Service deleted successfully.')
     return redirect(url_for('admin_dashboard'))
+
+@app.route('/professional/reject_request/<int:request_id>', methods=['POST'])
+@login_required
+def reject_request(request_id):
+    if current_user.role != 'professional':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    service_request = ServiceRequest.query.get_or_404(request_id)
+    if service_request.professional_id != current_user.id and service_request.professional_id is not None:
+        flash('You cannot reject a request that is not assigned to you.')
+        return redirect(url_for('view_requests'))
+
+    service_request.professional_id = None
+    service_request.service_status = 'requested'
+    db.session.commit()
+    flash('Service request rejected.')
+    return redirect(url_for('professional_dashboard'))
+
