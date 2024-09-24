@@ -1,6 +1,7 @@
 from app import db
 from flask_login import UserMixin
 from datetime import datetime
+from flask_login import LoginManager
 
 # User Model
 class User(UserMixin, db.Model):
@@ -48,8 +49,4 @@ class ServiceRequest(db.Model):
 
     def __repr__(self):
         return f'<ServiceRequest: {self.id}>'
-
-# Load User
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+    

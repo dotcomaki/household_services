@@ -1,11 +1,8 @@
-from app import app, db
 from flask import render_template, redirect, url_for, flash, request
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, IntegerField
-from wtforms.validators import DataRequired
-from forms import LoginForm, RegistrationForm
-from models import User
-from flask_login import login_user, login_required, logout_user, current_user
+from app import app, db
+from forms import LoginForm, RegistrationForm, ServiceForm, ServiceRequestForm, SearchForm
+from models import User, Service, ServiceRequest
+from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route('/')
@@ -77,27 +74,17 @@ def logout():
 @login_required
 def admin_dashboard():
     if current_user.role != 'admin':
-        flash ('Access denied')
+        flash('Access denied.')
         return redirect(url_for('index'))
-    return render_template('admin_dashboard.html')
-
-from forms import ServiceForm
-from models import Service
-
-# Create Service Form
-class ServiceForm(FlaskForm):
-    name = StringField('Service Name', validators=[DataRequired()])
-    base_price = IntegerField('Base Price', validators=[DataRequired()])
-    time_required = IntegerField('Time Required (in minutes)', validators=[DataRequired()])
-    description = StringField('Description')
-    submit = SubmitField('Add Service')
+    services = Service.query.all()
+    return render_template('admin_dashboard.html', services=services)
 
 # Create Service Route
 @app.route('/admin/create_service', methods=['GET', 'POST'])
 @login_required
 def create_service():
     if current_user.role != 'admin':
-        flash('Access denied')
+        flash('Access denied.')
         return redirect(url_for('index'))
     form = ServiceForm()
     if form.validate_on_submit():
@@ -109,7 +96,7 @@ def create_service():
         )
         db.session.add(service)
         db.session.commit()
-        flash('Service created successfully')
+        flash('Service created successfully.')
         return redirect(url_for('admin_dashboard'))
     return render_template('create_service.html', form=form)
 
@@ -156,13 +143,6 @@ def customer_dashboard():
         flash('Access denied.')
         return redirect(url_for('index'))
     return render_template('customer_dashboard.html')
-
-from forms import ServiceRequestForm
-
-# Service Request Form
-class ServiceRequestForm(FlaskForm):
-    service_id = IntegerField('Service ID', validators=[DataRequired()])
-    submit = SubmitField('Request Service')
 
 # Search Service Route
 @app.route('/customer/search_service', methods=['GET', 'POST'])
