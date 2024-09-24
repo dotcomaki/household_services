@@ -1,3 +1,5 @@
+print("routes.py is being imported")
+
 from flask import render_template, redirect, url_for, flash, request
 from app import app, db
 from forms import LoginForm, RegistrationForm, ServiceForm, ServiceRequestForm, SearchForm
@@ -18,7 +20,7 @@ def login():
         if form.username.data == 'admin' and form.password.data == 'admin':
             user = User.query.filter_by(username='admin').first()
             if not user:
-                admin_user = User(username='admin', password=generate_password_hash('admin'), role='admin')
+                user = User(username='admin', password=generate_password_hash('admin'), role='admin')
                 db.session.add(user)
                 db.session.commit()
             login_user(user)
@@ -108,8 +110,6 @@ def professional_dashboard():
         flash ('Access denied')
         return redirect(url_for('index'))
     return render_template('professional_dashboard.html')
-
-from models import ServiceRequest
 
 # Service Request Route
 @app.route('/professional/requests')
