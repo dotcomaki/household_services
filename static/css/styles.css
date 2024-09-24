@@ -1,0 +1,15 @@
+body {
+    padding-top: 56px;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.alert {
+    margin-top: 20px;
+}
