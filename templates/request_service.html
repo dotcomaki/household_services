@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Request Service</h2>
+<p>
+    <a href="{{ url_for('search_services') }}" class="btn btn-secondary">Back to Services</a>
+</p>
+<hr>
+<h3>Service Details</h3>
+<ul>
+    <li><strong>Name:</strong> {{ service.name }}</li>
+    <li><strong>Base Price:</strong> {{ service.base_price }}</li>
+    <li><strong>Time Required:</strong> {{ service.time_required }} minutes</li>
+    <li><strong>Description:</strong> {{ service.description }}</li>
+</ul>
+<form method="POST" action="{{ url_for('request_service', service_id=service.id) }}">
+    {{ form.hidden_tag() }}
+    {{ form.submit(class_="btn btn-success") }}
+</form>
+{% endblock %}
