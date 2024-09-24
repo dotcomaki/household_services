@@ -5,10 +5,12 @@ from datetime import datetime
 
 # User Model
 class User(UserMixin, db.Model):
+    __tablename__ = 'users'  # Ensure table name is specified
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-    role = db.Column(db.String(20), nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(20), nullable=False)  # 'admin', 'professional', 'customer'
     is_active = db.Column(db.Boolean, default=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -17,35 +19,46 @@ class User(UserMixin, db.Model):
     experience = db.Column(db.Integer)
 
     # Relations
-    service_requests = db.relationship('ServiceRequest', backref='customer', lazy=True)
-    assigned_requests = db.relationship('ServiceRequest', backref='professional', lazy=True, foreign_keys='ServiceRequest.professional_id')
+    customer_service_requests = db.relationship('ServiceRequest', backref='customer', foreign_keys='ServiceRequest.customer_id', lazy='dynamic')
+    professional_service_requests = db.relationship('ServiceRequest', backref='professional', foreign_keys='ServiceRequest.professional_id', lazy='dynamic')
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
     
     def __repr__(self):
         return f'<User: {self.username}>'
     
 # Service Model
 class Service(db.Model):
+    __tablename__ = 'services'  # Ensure table name is specified
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     base_price = db.Column(db.Float, nullable=False)
+    time_required = db.Column(db.Integer, nullable=False)  # Time in minutes
     description = db.Column(db.Text)
-    time_required = db.Column(db.Integer)
         
     def __repr__(self):
         return f'<Service: {self.name}>'
     
 # Service Request Model
 class ServiceRequest(db.Model):
+    __tablename__ = 'service_requests'  # Ensure table name is specified
+
     id = db.Column(db.Integer, primary_key=True)
-    service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
-    customer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    professional_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    professional_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    service_status = db.Column(db.String(20), nullable=False, default='requested')
+
+    # Relationships
+    service = db.relationship('Service', backref='service_requests')
     date_of_request = db.Column(db.DateTime, default=datetime.utcnow)
     date_of_completion = db.Column(db.DateTime)
-    service_status = db.Column(db.String(20), default='requested')
     remarks = db.Column(db.Text)
-
-    service = db.relationship('Service')
 
     def __repr__(self):
         return f'<ServiceRequest: {self.id}>'
