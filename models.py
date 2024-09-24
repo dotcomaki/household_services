@@ -1,15 +1,15 @@
-from app import db, login_manager
+from app import db
 from flask_login import UserMixin
 from datetime import datetime
 
 # User Model
 class User(UserMixin, db.Model):
-    id = db.column(db.Integer, primary_key=True)
-    username = db.column(db.String(100), unique=True, nullable=False)
-    password = db.column(db.String(100), nullable=False)
-    role = db.column(db.String(20), nullable=False)
-    is_active = db.column(db.Boolean, default=True)
-    date_created = db.column(db.DateTime, default=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    role = db.Column(db.String(20), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     # For Professionals
     service_type = db.Column(db.String(100))
@@ -24,11 +24,11 @@ class User(UserMixin, db.Model):
     
 # Service Model
 class Service(db.Model):
-    id = db.column(db.Integer, primary_key=True)
-    name = db.column(db.String(100), nullable=False)
-    base_price = db.column(db.Float, nullable=False)
-    description = db.column(db.Text)
-    time_required = db.column(db.Integer)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    base_price = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text)
+    time_required = db.Column(db.Integer)
         
     def __repr__(self):
         return f'<Service: {self.name}>'
