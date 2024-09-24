@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Search Services</h2>
+<p>
+    <a href="{{ url_for('customer_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</p>
+<hr>
+<form method="POST" action="{{ url_for('search_services') }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.search_query.label }} {{ form.search_query(class_="form-control") }}
+    </div>
+    {{ form.submit(class_="btn btn-primary") }}
+</form>
+<hr>
+<h3>Available Services</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Base Price</th>
+            <th>Time Required</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for service in services %}
+        <tr>
+            <td>{{ service.id }}</td>
+            <td>{{ service.name }}</td>
+            <td>{{ service.base_price }}</td>
+            <td>{{ service.time_required }}</td>
+            <td>{{ service.description }}</td>
+            <td>
+                <a href="{{ url_for('request_service', service_id=service.id) }}" class="btn btn-sm btn-success">Request Service</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
