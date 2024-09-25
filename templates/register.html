@@ -1,33 +1,96 @@
+<!-- templates/register.html -->
+
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Register</h2>
-<form method="POST" action="{{ url_for('register') }}">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.role.label }} {{ form.role(class_="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.username.label }} {{ form.username(class_="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.password.label }} {{ form.password(class_="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.password_confirm.label }} {{ form.password_confirm(class_="form-control") }}
-    </div>
-    <!-- Professional-specific fields -->
-    <div id="professional-fields" style="display: none;">
+<div class="container mt-4">
+    <h2>Register</h2>
+    <form method="POST" action="{{ url_for('register') }}">
+        {{ form.hidden_tag() }}
+        
+        <!-- Role Field -->
         <div class="form-group">
-            {{ form.service_type.label }} {{ form.service_type(class_="form-control") }}
+            {{ form.role.label }}
+            {{ form.role(class_="form-control") }}
+            {% if form.role.errors %}
+                <div class="text-danger">
+                    {% for error in form.role.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
+        
+        <!-- Username Field -->
         <div class="form-group">
-            {{ form.experience.label }} {{ form.experience(class_="form-control") }}
+            {{ form.username.label }}
+            {{ form.username(class_="form-control") }}
+            {% if form.username.errors %}
+                <div class="text-danger">
+                    {% for error in form.username.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-    </div>
-    {{ form.submit(class_="btn btn-primary") }}
-</form>
-<p class="mt-2">Already have an account? <a href="{{ url_for('login') }}">Login here</a>.</p>
+        
+        <!-- Password Field -->
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password(class_="form-control") }}
+            {% if form.password.errors %}
+                <div class="text-danger">
+                    {% for error in form.password.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Confirm Password Field -->
+        <div class="form-group">
+            {{ form.confirm_password.label }}
+            {{ form.confirm_password(class_="form-control") }}
+            {% if form.confirm_password.errors %}
+                <div class="text-danger">
+                    {% for error in form.confirm_password.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Professional-specific Fields -->
+        <div id="professional-fields" style="display: none;">
+            <div class="form-group">
+                {{ form.service_type.label }}
+                {{ form.service_type(class_="form-control") }}
+                {% if form.service_type.errors %}
+                    <div class="text-danger">
+                        {% for error in form.service_type.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.experience.label }}
+                {{ form.experience(class_="form-control") }}
+                {% if form.experience.errors %}
+                    <div class="text-danger">
+                        {% for error in form.experience.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+    </form>
+    <p class="mt-2">Already have an account? <a href="{{ url_for('login') }}">Login here</a>.</p>
+</div>
 
 <!-- JS to show/hide professional fields based on role selected -->
 <script>

@@ -44,27 +44,27 @@ def login():
 # Registration Route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)
+        user = User(
+            username=form.username.data,
+            password=hashed_password,
+            role=form.role.data
+        )
+        # Handle professional-specific fields
         if form.role.data == 'professional':
-            user = User(
-                username=form.username.data,
-                password=hashed_password,
-                role='professional',
-                service_type=form.service_type.data,
-                experience=form.experience.data
-            )
-        else:
-            user = User(
-                username=form.username.data,
-                password=hashed_password,
-                role='customer'
-            )
+            user.service_type = form.service_type.data
+            user.experience = int(form.experience.data)
         db.session.add(user)
         db.session.commit()
-        flash('Registration successful')
+        flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
+    else:
+        print('Form did not validate.')
+        print('Form errors:', form.errors)
     return render_template('register.html', form=form)
 
 # Logout Route
@@ -111,9 +111,11 @@ def create_service():
 @login_required
 def professional_dashboard():
     if current_user.role != 'professional':
-        flash ('Access denied')
+        flash('Access denied.')
         return redirect(url_for('index'))
-    return render_template('professional_dashboard.html')
+
+    assigned_requests = ServiceRequest.query.filter_by(professional_id=current_user.id).all()
+    return render_template('professional_dashboard.html', assigned_requests=assigned_requests)
 
 # Service Request Route
 @app.route('/professional/requests')
@@ -126,7 +128,7 @@ def view_requests():
     return render_template('professional_requests.html', requests=requests)
 
 # Accept Request Route
-@app.route('/professional/accept_request/<int:request_id>', methods=['POST'])
+@app.route('/professional/accept_request/<int:request_id>', methods=['GET'])
 @login_required
 def accept_request(request_id):
     if current_user.role != 'professional':
@@ -151,7 +153,9 @@ def customer_dashboard():
     if current_user.role != 'customer':
         flash('Access denied.')
         return redirect(url_for('index'))
-    return render_template('customer_dashboard.html')
+
+    service_requests = ServiceRequest.query.filter_by(customer_id=current_user.id).order_by(ServiceRequest.id.desc()).all()
+    return render_template('customer_dashboard.html', service_requests=service_requests)
 
 # Search Service Route
 @app.route('/customer/search_service', methods=['GET', 'POST'])
