@@ -14,7 +14,6 @@
     <li><strong>Description:</strong> {{ service.description }}</li>
 </ul>
 <form method="POST" action="{{ url_for('request_service', service_id=service.id) }}">
-    {{ form.hidden_tag() }}
     {{ form.submit(class_="btn btn-success") }}
 </form>
 {% endblock %}

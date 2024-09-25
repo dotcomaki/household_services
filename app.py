@@ -19,5 +19,7 @@ def load_user(user_id):
 
 import routes
 
+app.config['WTF_CSRF_ENABLED'] = False
+
 if __name__ == '__main__':
     app.run(debug=True)

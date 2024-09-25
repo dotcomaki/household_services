@@ -1,28 +1,77 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-    <h1>Edit User - {{ user.username }}</h1>
-    <form method="POST">
-        {{ form.hidden_tag() }}
+<div class="container mt-4">
+    <h2>Edit Professional</h2>
+
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+            {% for field_errors in form.errors.values() %}
+                {% for error in field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('edit_user', user_id=user.id) }}">
+        <!-- Username Field -->
         <div class="form-group">
             {{ form.username.label }}
-            {{ form.username(class="form-control", value=user.username) }}
+            {{ form.username(class_='form-control') }}
+            {% if form.username.errors %}
+                <div class="text-danger">
+                    {% for error in form.username.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
+
+        <!-- Service Type Field -->
         <div class="form-group">
-            {{ form.password.label }}
-            {{ form.password(class="form-control") }}
+            {{ form.service_type.label }}
+            {{ form.service_type(class_='form-control') }}
+            {% if form.service_type.errors %}
+                <div class="text-danger">
+                    {% for error in form.service_type.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
+
+        <!-- Experience Field -->
         <div class="form-group">
-            {{ form.confirm_password.label }}
-            {{ form.confirm_password(class="form-control") }}
+            {{ form.experience.label }}
+            {{ form.experience(class_='form-control') }}
+            {% if form.experience.errors %}
+                <div class="text-danger">
+                    {% for error in form.experience.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
+
+        <!-- Approval Status Field -->
         <div class="form-group">
-            {{ form.role.label }}
-            {{ form.role(class="form-control", value=user.role) }}
+            {{ form.is_approved.label }}
+            {{ form.is_approved(class_='form-control') }}
+            {% if form.is_approved.errors %}
+                <div class="text-danger">
+                    {% for error in form.is_approved.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
+
+        <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
-        <a href="{{ url_for('manage_users') }}" class="btn btn-secondary">Cancel</a>
-    </form>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+    /form>
 </div>
 {% endblock %}

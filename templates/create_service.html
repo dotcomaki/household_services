@@ -3,7 +3,6 @@
 {% block content %}
 <h2>Create New Service</h2>
 <form method="POST" action="{{ url_for('create_service') }}">
-    {{ form.hidden_tag() }}
     <div class="form-group">
         {{ form.name.label }} {{ form.name(class_="form-control") }}
     </div>

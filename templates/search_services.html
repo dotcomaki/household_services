@@ -4,7 +4,6 @@
 <div class="container mt-4">
     <h1>Search Services</h1>
     <form method="POST">
-        {{ form.hidden_tag() }}
         <div class="form-group">
             {{ form.search_term.label }}
             {{ form.search_term(class="form-control", placeholder="Enter service name") }}

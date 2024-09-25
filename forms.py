@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, IntegerField, TextAreaField
-from wtforms.validators import DataRequired, Length, EqualTo, Optional, ValidationError
+from wtforms.validators import DataRequired, Length, EqualTo, Optional, ValidationError, NumberRange
 
 # Login Form
 class LoginForm(FlaskForm):
@@ -78,11 +78,16 @@ class ServiceRequestForm(FlaskForm):
 
 # Admin Edit User Form
 class EditUserForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=100)])
-    password = PasswordField('New Password', validators=[Optional()])
-    confirm_password = PasswordField('Confirm New Password', validators=[
-        Optional(),
-        EqualTo('password', message='Passwords must match.')
+    username = StringField('Username', validators=[
+        DataRequired(), Length(min=2, max=100)
     ])
-    role = SelectField('Role', choices=[('admin', 'Admin'), ('professional', 'Professional'), ('customer', 'Customer')], validators=[DataRequired()])
-    submit = SubmitField('Update User')
+    service_type = StringField('Service Type', validators=[Optional()])
+    experience = IntegerField('Experience (years)', validators=[
+        Optional(),
+        NumberRange(min=0, message='Experience must be a positive number.')
+    ], filters=[lambda x: x or None])
+    is_approved = SelectField('Approval Status', choices=[
+        ('True', 'Approved'),
+        ('False', 'Not Approved')
+    ], validators=[DataRequired()])
+    submit = SubmitField('Save Changes')

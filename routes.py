@@ -137,17 +137,23 @@ def edit_user(user_id):
         return redirect(url_for('index'))
 
     user = User.query.get_or_404(user_id)
-    form = EditUserForm(obj=user)
 
-    if form.validate_on_submit():
-        user.username = form.username.data
-        user.role = form.role.data
-        # Update password if provided
-        if form.password.data:
-            user.password = generate_password_hash(form.password.data)
-        db.session.commit()
-        flash('User updated successfully.')
-        return redirect(url_for('manage_users'))
+    if request.method == 'POST':
+        form = EditUserForm(request.form)
+        if form.validate():
+            user.username = form.username.data
+            user.service_type = form.service_type.data
+            user.experience = form.experience.data
+            user.is_approved = True if form.is_approved.data == 'True' else False
+
+            db.session.commit()
+            flash('User updated successfully.')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            print('Form did not validate.')
+            print('Form errors:', form.errors)
+    else:
+        form = EditUserForm(obj=user)
 
     return render_template('edit_user.html', form=form, user=user)
 
