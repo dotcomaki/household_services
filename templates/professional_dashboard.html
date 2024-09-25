@@ -1,3 +1,5 @@
+<!-- templates/professional_dashboard.html -->
+
 {% extends 'base.html' %}
 
 {% block content %}
@@ -5,6 +7,8 @@
     <h1>Professional Dashboard</h1>
     <hr>
     <a href="{{ url_for('view_requests') }}" class="btn btn-primary">View Available Service Requests</a>
+
+    <!-- Assigned Tasks Section -->
     <h2 class="mt-4">Assigned Tasks</h2>
     {% if assigned_requests %}
     <table class="table table-striped">
@@ -23,8 +27,9 @@
                 <td>{{ request.customer.username }}</td>
                 <td>{{ request.service_status.capitalize() }}</td>
                 <td>
-                    <form action="{{ url_for('accept_request', request_id=request.id) }}" method="POST" style="display:inline;">
-                        <button type="submit" class="btn btn-sm btn-success">Mark as Completed</button>
+                    <!-- Display "Mark as Completed" button -->
+                    <form action="{{ url_for('complete_request', request_id=request.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to mark this task as completed?');">Mark as Completed</button>
                     </form>
                 </td>
             </tr>
@@ -33,6 +38,33 @@
     </table>
     {% else %}
     <p>You have no assigned tasks at the moment.</p>
+    {% endif %}
+
+    <!-- Closed Tasks Section -->
+    <h2 class="mt-4">Closed Tasks</h2>
+    {% if closed_requests %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Service Name</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Date Completed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in closed_requests %}
+            <tr>
+                <td>{{ request.service.name }}</td>
+                <td>{{ request.customer.username }}</td>
+                <td>{{ request.service_status.capitalize() }}</td>
+                <td>{{ request.date_completed.strftime('%Y-%m-%d %H:%M') if request.date_completed else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>You have no closed tasks at the moment.</p>
     {% endif %}
 </div>
 {% endblock %}

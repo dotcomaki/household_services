@@ -22,4 +22,4 @@ import routes
 app.config['WTF_CSRF_ENABLED'] = False
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

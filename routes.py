@@ -194,7 +194,7 @@ def edit_service(service_id):
     return render_template('edit_service.html', form=form, service=service)
 
 # Delete Service Route
-@app.route('/admin/delete_service/<int:service_id>', methods=['POST'])
+@app.route('/delete_service/<int:service_id>', methods=['POST'])
 @login_required
 def delete_service(service_id):
     if current_user.role != 'admin':
@@ -202,10 +202,18 @@ def delete_service(service_id):
         return redirect(url_for('index'))
 
     service = Service.query.get_or_404(service_id)
+
+    # Check for any associated service requests
+    associated_requests = ServiceRequest.query.filter_by(service_id=service.id).first()
+    if associated_requests:
+        flash('Cannot delete service. There are service requests associated with this service.')
+        return redirect(url_for('admin_dashboard'))  # Adjust the redirect as necessary
+
+    # Proceed with deletion
     db.session.delete(service)
     db.session.commit()
     flash('Service deleted successfully.')
-    return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('admin_dashboard'))  # Adjust the redirect as necessary
 
 # Approve Professional Route
 @app.route('/admin/approve_professional/<int:professional_id>', methods=['POST'])
@@ -288,15 +296,45 @@ def admin_summary():
 
 
 # Professional Dashboard
-@app.route('/professional/dashboard')
+@app.route('/professional_dashboard')
 @login_required
 def professional_dashboard():
     if current_user.role != 'professional':
         flash('Access denied.')
         return redirect(url_for('index'))
 
-    assigned_requests = ServiceRequest.query.filter_by(professional_id=current_user.id).all()
-    return render_template('professional_dashboard.html', assigned_requests=assigned_requests)
+    # Define the statuses for assigned (open) tasks
+    assigned_statuses = ['accepted', 'in_progress']
+
+    # Fetch assigned (open) tasks
+    assigned_requests = ServiceRequest.query.filter(
+        ServiceRequest.professional_id == current_user.id,
+        ServiceRequest.service_status.in_(assigned_statuses)
+    ).all()
+
+    # Define the statuses for closed tasks
+    closed_statuses = ['completed', 'cancelled']
+
+    # Fetch closed tasks
+    closed_requests = ServiceRequest.query.filter(
+        ServiceRequest.professional_id == current_user.id,
+        ServiceRequest.service_status.in_(closed_statuses)
+    ).all()
+
+    # Debugging output (optional)
+    print(f"Assigned Requests Count: {len(assigned_requests)}")
+    for req in assigned_requests:
+        print(f"Assigned - ID: {req.id}, Status: {req.service_status}")
+
+    print(f"Closed Requests Count: {len(closed_requests)}")
+    for req in closed_requests:
+        print(f"Closed - ID: {req.id}, Status: {req.service_status}")
+
+    return render_template(
+        'professional_dashboard.html',
+        assigned_requests=assigned_requests,
+        closed_requests=closed_requests
+    )
 
 # Service Request Route
 @app.route('/professional/requests')
@@ -309,7 +347,7 @@ def view_requests():
     return render_template('professional_requests.html', requests=requests)
 
 # Accept Request Route
-@app.route('/professional/accept_request/<int:request_id>', methods=['GET'])
+@app.route('/accept_request/<int:request_id>', methods=['POST', 'GET'])
 @login_required
 def accept_request(request_id):
     if current_user.role != 'professional':
@@ -317,14 +355,18 @@ def accept_request(request_id):
         return redirect(url_for('index'))
 
     service_request = ServiceRequest.query.get_or_404(request_id)
-    if service_request.service_status != 'requested':
-        flash('This request is not available.')
+
+    # Ensure the request is not already assigned
+    if service_request.professional_id:
+        flash('This request has already been assigned.')
         return redirect(url_for('view_requests'))
 
+    # Assign the request to the professional
     service_request.professional_id = current_user.id
-    service_request.service_status = 'assigned'
+    service_request.service_status = 'accepted'  # Update the status appropriately
     db.session.commit()
-    flash('Service request accepted.')
+
+    flash('Service request accepted and assigned to you.')
     return redirect(url_for('professional_dashboard'))
 
 # Reject Request Route
@@ -344,6 +386,29 @@ def reject_request(request_id):
     service_request.service_status = 'requested'
     db.session.commit()
     flash('Service request rejected.')
+    return redirect(url_for('professional_dashboard'))
+
+# Complete Request Route
+@app.route('/complete_request/<int:request_id>', methods=['POST'])
+@login_required
+def complete_request(request_id):
+    if current_user.role != 'professional':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    service_request = ServiceRequest.query.get_or_404(request_id)
+
+    # Check if the current user is assigned to this request
+    if service_request.professional_id != current_user.id:
+        flash('You are not authorized to complete this service request.')
+        return redirect(url_for('professional_dashboard'))
+
+    # Update the service request status
+    service_request.service_status = 'completed'
+    service_request.date_of_completion = datetime.utcnow()
+    db.session.commit()
+
+    flash('Service request marked as completed.')
     return redirect(url_for('professional_dashboard'))
 
 
@@ -397,4 +462,19 @@ def request_service(service_id):
     db.session.add(service_request)
     db.session.commit()
     flash('Service request created.')
+    return redirect(url_for('customer_dashboard'))
+
+# Cancel Request Route
+@app.route('/cancel_request/<int:request_id>', methods=['POST'])
+@login_required
+def cancel_request(request_id):
+    service_request = ServiceRequest.query.get_or_404(request_id)
+    
+    if service_request.customer_id != current_user.id:
+        flash('You are not authorized to cancel this request.')
+        return redirect(url_for('customer_dashboard'))
+
+    service_request.service_status = 'cancelled'
+    db.session.commit()
+    flash('Your service request has been cancelled successfully.')
     return redirect(url_for('customer_dashboard'))

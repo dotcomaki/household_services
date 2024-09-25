@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_completed = db.Column(db.DateTime)
 
     # For Professionals Only
     is_approved = db.Column(db.Boolean, default=False)
