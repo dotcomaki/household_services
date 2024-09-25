@@ -23,7 +23,6 @@
                 <td>{{ request.customer.username }}</td>
                 <td>{{ request.service_status.capitalize() }}</td>
                 <td>
-                    <!-- You can add actions such as marking the task as completed -->
                     <form action="{{ url_for('accept_request', request_id=request.id) }}" method="POST" style="display:inline;">
                         <button type="submit" class="btn btn-sm btn-success">Mark as Completed</button>
                     </form>

@@ -5,20 +5,20 @@ from datetime import datetime
 
 # User Model
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'  # Ensure table name is specified
+    __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  # 'admin', 'professional', 'customer'
+    role = db.Column(db.String(20), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # For Professionals
+    # For Professionals Only
     service_type = db.Column(db.String(100))
     experience = db.Column(db.Integer)
 
-    # Relations
+    # DB Relationships
     customer_service_requests = db.relationship('ServiceRequest', backref='customer', foreign_keys='ServiceRequest.customer_id', lazy='dynamic')
     professional_service_requests = db.relationship('ServiceRequest', backref='professional', foreign_keys='ServiceRequest.professional_id', lazy='dynamic')
 
@@ -33,12 +33,12 @@ class User(UserMixin, db.Model):
     
 # Service Model
 class Service(db.Model):
-    __tablename__ = 'services'  # Ensure table name is specified
+    __tablename__ = 'services'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, nullable =False, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     base_price = db.Column(db.Float, nullable=False)
-    time_required = db.Column(db.Integer, nullable=False)  # Time in minutes
+    time_required = db.Column(db.Integer, nullable=False)  # in minutes
     description = db.Column(db.Text)
         
     def __repr__(self):
@@ -46,7 +46,7 @@ class Service(db.Model):
     
 # Service Request Model
 class ServiceRequest(db.Model):
-    __tablename__ = 'service_requests'  # Ensure table name is specified
+    __tablename__ = 'service_requests'
 
     id = db.Column(db.Integer, primary_key=True)
     service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=False)
@@ -54,7 +54,7 @@ class ServiceRequest(db.Model):
     professional_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     service_status = db.Column(db.String(20), nullable=False, default='requested')
 
-    # Relationships
+    # DB Relationships
     service = db.relationship('Service', backref='service_requests')
     date_of_request = db.Column(db.DateTime, default=datetime.utcnow)
     date_of_completion = db.Column(db.DateTime)
@@ -62,4 +62,3 @@ class ServiceRequest(db.Model):
 
     def __repr__(self):
         return f'<ServiceRequest: {self.id}>'
-    

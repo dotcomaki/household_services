@@ -1,5 +1,3 @@
-<!-- templates/search_services.html -->
-
 {% extends 'base.html' %}
 
 {% block content %}
@@ -30,7 +28,7 @@
             {% for service in services %}
             <tr>
                 <td>{{ service.name }}</td>
-                <td>${{ service.base_price }}</td>
+                <td>₹{{ service.base_price }}</td>
                 <td>{{ service.time_required }}</td>
                 <td>{{ service.description }}</td>
                 <td>

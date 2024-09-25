@@ -1,15 +1,14 @@
 from flask_wtf import FlaskForm
-from wtforms import (
-    StringField, PasswordField, SubmitField, SelectField, IntegerField,
-    TextAreaField
-)
+from wtforms import StringField, PasswordField, SubmitField, SelectField, IntegerField, TextAreaField
 from wtforms.validators import DataRequired, Length, EqualTo, Optional, ValidationError
 
+# Login Form
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
+# Registration Form
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[
         DataRequired(message='Username is required.'), Length(min=2, max=100)
@@ -42,7 +41,6 @@ class RegistrationForm(FlaskForm):
                 self.experience.errors.append('Experience is required for professionals.')
                 return False
             else:
-                # Validate that experience is a positive integer
                 try:
                     experience_value = int(self.experience.data)
                     if experience_value < 0:
@@ -53,13 +51,14 @@ class RegistrationForm(FlaskForm):
                     return False
         return True
 
-    # Existing validate_username method
+    # Existing User Function
     def validate_username(self, username):
         from models import User
         user = User.query.filter_by(username=username.data).first()
         if user is not None:
             raise ValidationError('Username already exists. Please choose a different username.')
 
+# Service Form
 class ServiceForm(FlaskForm):
     name = StringField('Service Name', validators=[DataRequired()])
     base_price = IntegerField('Base Price', validators=[DataRequired()])
@@ -67,14 +66,17 @@ class ServiceForm(FlaskForm):
     description = StringField('Description')
     submit = SubmitField('Create Service')
 
-class ServiceRequestForm(FlaskForm):
-    service_id = IntegerField('Service ID', validators=[DataRequired()])
-    submit = SubmitField('Request Service')
-
+# Search Form
 class SearchForm(FlaskForm):
     search_term = StringField('Search', validators=[DataRequired()])
     submit = SubmitField('Search')
 
+# Service Request Form
+class ServiceRequestForm(FlaskForm):
+    service_id = IntegerField('Service ID', validators=[DataRequired()])
+    submit = SubmitField('Request Service')
+
+# Admin Edit User Form
 class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=100)])
     password = PasswordField('New Password', validators=[Optional()])
