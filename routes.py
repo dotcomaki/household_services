@@ -2,6 +2,7 @@ print("routes.py is being imported")
 
 from flask import render_template, redirect, url_for, flash, request
 from app import app, db
+from datetime import datetime
 from forms import LoginForm, RegistrationForm, ServiceForm, ServiceRequestForm, SearchForm, EditUserForm
 from models import User, Service, ServiceRequest
 from flask_login import login_user, logout_user, login_required, current_user
@@ -71,6 +72,12 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+# Services Route
+@app.route('/services')
+def services():
+    services = Service.query.all()
+    return render_template('services.html', services=services)
+
 
 
 ## ADMIN ROUTES ##
@@ -85,7 +92,9 @@ def admin_dashboard():
         flash('Access denied.')
         return redirect(url_for('index'))
     services = Service.query.all()
-    return render_template('admin_dashboard.html', services=services)
+    professionals = User.query.filter_by(role='professional').all()
+    service_requests = ServiceRequest.query.all()
+    return render_template('admin_dashboard.html', services=services, professionals=professionals, service_requests=service_requests)
 
 # Create Service Route
 @app.route('/admin/create_service', methods=['GET', 'POST'])
@@ -192,6 +201,80 @@ def delete_service(service_id):
     flash('Service deleted successfully.')
     return redirect(url_for('admin_dashboard'))
 
+# Approve Professional Route
+@app.route('/admin/approve_professional/<int:professional_id>', methods=['POST'])
+@login_required
+def approve_professional(professional_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    professional = User.query.get_or_404(professional_id)
+    professional.is_approved = True
+    db.session.commit()
+    flash('Professional approved successfully.')
+    return redirect(url_for('admin_dashboard'))
+
+# Reject Professional Route
+@app.route('/admin/reject_professional/<int:professional_id>', methods=['POST'])
+@login_required
+def reject_professional(professional_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    professional = User.query.get_or_404(professional_id)
+    professional.is_approved = False
+    db.session.commit()
+    flash('Professional rejected.')
+    return redirect(url_for('admin_dashboard'))
+
+# Delete Professional Route
+@app.route('/admin/delete_professional/<int:professional_id>', methods=['POST'])
+@login_required
+def delete_professional(professional_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    professional = User.query.get_or_404(professional_id)
+    db.session.delete(professional)
+    db.session.commit()
+    flash('Professional deleted successfully.')
+    return redirect(url_for('admin_dashboard'))
+
+# Search Route
+@app.route('/admin/search', methods=['GET', 'POST'])
+@login_required
+def admin_search():
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    results = None
+    if request.method == 'POST':
+        search_by = request.form.get('search_by')
+        search_query = request.form.get('search_query')
+        if search_by == 'service_request':
+            results = ServiceRequest.query.filter(ServiceRequest.id == search_query).all()
+        elif search_by == 'customer':
+            results = User.query.filter(User.role == 'customer', User.username.ilike(f'%{search_query}%')).all()
+        elif search_by == 'professional':
+            results = User.query.filter(User.role == 'professional', User.username.ilike(f'%{search_query}%')).all()
+        elif search_by == 'service':
+            results = Service.query.filter(Service.name.ilike(f'%{search_query}%')).all()
+        else:
+            flash('Invalid search option.')
+    return render_template('admin_search.html', results=results)
+
+# Summary Route
+@app.route('/admin/summary')
+@login_required
+def admin_summary():
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+    return render_template('admin_summary.html')
 
 
 ## PROFESSIONAL ROUTES ##

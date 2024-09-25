@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     # For Professionals Only
+    is_approved = db.Column(db.Boolean, default=False)
     service_type = db.Column(db.String(100))
     experience = db.Column(db.Integer)
 

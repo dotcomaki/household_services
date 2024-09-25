@@ -1,0 +1,105 @@
+<!-- templates/admin_search.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Search</h2>
+    <form method="POST" action="{{ url_for('admin_search') }}">
+        <div class="form-group">
+            <label for="search_by">Search By:</label>
+            <select name="search_by" id="search_by" class="form-control">
+                <option value="service_request">Service Request</option>
+                <option value="customer">Customer</option>
+                <option value="professional">Professional</option>
+                <option value="service">Service</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="search_query">Search Query:</label>
+            <input type="text" name="search_query" id="search_query" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    {% if results is not none %}
+        <h3 class="mt-4">Search Results</h3>
+        {% if results %}
+            <!-- Display results based on search_by -->
+            {% if request.form.get('search_by') == 'service_request' %}
+                <!-- Service Requests Table -->
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Assigned Professional</th>
+                            <th>Requested Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in results %}
+                        <tr>
+                            <td>{{ request.id }}</td>
+                            <td>
+                                {% if request.professional %}
+                                    {{ request.professional.username }}
+                                {% else %}
+                                    Not Assigned
+                                {% endif %}
+                            </td>
+                            <td>{{ request.requested_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ request.service_status.capitalize() }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% elif request.form.get('search_by') == 'customer' or request.form.get('search_by') == 'professional' %}
+                <!-- Users Table -->
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in results %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.role.capitalize() }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% elif request.form.get('search_by') == 'service' %}
+                <!-- Services Table -->
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Service Name</th>
+                            <th>Base Price</th>
+                            <th>Time Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in results %}
+                        <tr>
+                            <td>{{ service.id }}</td>
+                            <td>{{ service.name }}</td>
+                            <td>{{ service.base_price }}</td>
+                            <td>{{ service.time_required }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        {% else %}
+            <p>No results found.</p>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

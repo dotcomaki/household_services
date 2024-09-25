@@ -1,0 +1,20 @@
+<!-- templates/services.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Our Services</h1>
+    <hr>
+    <div class="row">
+        {% for service in services %}
+        <div class="col-md-4">
+            <h3>{{ service.name }}</h3>
+            <p>{{ service.description }}</p>
+            <p>Base Price: {{ service.base_price }}</p>
+            <a href="{{ url_for('request_service', service_id=service.id) }}" class="btn btn-primary">Request Service</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
