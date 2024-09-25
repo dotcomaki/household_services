@@ -35,7 +35,7 @@
             <td>{{ request.date_of_request.strftime('%Y-%m-%d %H:%M') }}</td>
             <td>
                 {% if request.service_status != 'closed' %}
-                <a href="{{ url_for('cancel_request', request_id=request.id) }}" class="btn btn-sm btn-danger">Cancel</a>
+                <a href="{{ url_for('reject_request', request_id=request.id) }}" class="btn btn-sm btn-danger">Cancel</a>
                 {% else %}
                 <span class="text-success">Completed</span>
                 {% endif %}
