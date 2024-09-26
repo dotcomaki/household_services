@@ -1,5 +1,6 @@
 print("routes.py is being imported")
 
+from typing import NotRequired
 from flask import render_template, redirect, url_for, flash, request
 from app import app, db
 from datetime import datetime
@@ -132,29 +133,27 @@ def manage_users():
 @app.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def edit_user(user_id):
-    if current_user.role != 'admin':
-        flash('Access denied.')
-        return redirect(url_for('index'))
-
     user = User.query.get_or_404(user_id)
-
-    if request.method == 'POST':
-        form = EditUserForm(request.form)
-        if form.validate():
-            user.username = form.username.data
+    form = EditUserForm(obj=user)
+    
+    # Add required validators to professional-specific fields if the user is a professional
+    if user.role == 'professional':
+        form.service_type.validators = [NotRequired()]
+        form.experience.validators = [NotRequired()]
+    
+    if form.validate_on_submit():
+        user.username = form.username.data
+        if form.password.data:
+            hashed_password = generate_password_hash(form.password.data)
+            user.password = hashed_password
+        if user.role == 'professional':
             user.service_type = form.service_type.data
             user.experience = form.experience.data
-            user.is_approved = True if form.is_approved.data == 'True' else False
-
-            db.session.commit()
-            flash('User updated successfully.')
-            return redirect(url_for('admin_dashboard'))
-        else:
-            print('Form did not validate.')
-            print('Form errors:', form.errors)
-    else:
-        form = EditUserForm(obj=user)
-
+            user.is_approved = form.is_approved.data
+        db.session.commit()
+        flash('User updated successfully.')
+        return redirect(url_for('admin_dashboard'))
+    
     return render_template('edit_user.html', form=form, user=user)
 
 # Delete User Route

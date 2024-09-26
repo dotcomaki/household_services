@@ -81,6 +81,9 @@ class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[
         DataRequired(), Length(min=2, max=100)
     ])
+    password = PasswordField('Password', validators=[
+        Optional(), Length(min=6)
+    ])
     service_type = StringField('Service Type', validators=[Optional()])
     experience = IntegerField('Experience (years)', validators=[
         Optional(),
@@ -89,5 +92,5 @@ class EditUserForm(FlaskForm):
     is_approved = SelectField('Approval Status', choices=[
         ('True', 'Approved'),
         ('False', 'Not Approved')
-    ], validators=[DataRequired()])
+    ], validators=[Optional()])
     submit = SubmitField('Save Changes')
