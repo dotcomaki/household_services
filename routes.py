@@ -1,3 +1,4 @@
+# Debug check
 print("routes.py is being imported")
 
 from typing import NotRequired
@@ -26,7 +27,7 @@ def register():
             password=hashed_password,
             role=form.role.data
         )
-        # Handle professional-specific fields
+        # Handle professional specific fields
         if form.role.data == 'professional':
             user.service_type = form.service_type.data
             user.experience = int(form.experience.data)
@@ -136,7 +137,6 @@ def edit_user(user_id):
     user = User.query.get_or_404(user_id)
     form = EditUserForm(obj=user)
     
-    # Add required validators to professional-specific fields if the user is a professional
     if user.role == 'professional':
         form.service_type.validators = [NotRequired()]
         form.experience.validators = [NotRequired()]
@@ -202,17 +202,15 @@ def delete_service(service_id):
 
     service = Service.query.get_or_404(service_id)
 
-    # Check for any associated service requests
     associated_requests = ServiceRequest.query.filter_by(service_id=service.id).first()
     if associated_requests:
         flash('Cannot delete service. There are service requests associated with this service.')
-        return redirect(url_for('admin_dashboard'))  # Adjust the redirect as necessary
+        return redirect(url_for('admin_dashboard'))
 
-    # Proceed with deletion
     db.session.delete(service)
     db.session.commit()
     flash('Service deleted successfully.')
-    return redirect(url_for('admin_dashboard'))  # Adjust the redirect as necessary
+    return redirect(url_for('admin_dashboard'))
 
 # Approve Professional Route
 @app.route('/admin/approve_professional/<int:professional_id>', methods=['POST'])
@@ -320,7 +318,7 @@ def professional_dashboard():
         ServiceRequest.service_status.in_(closed_statuses)
     ).all()
 
-    # Debugging output (optional)
+    # Debug Check
     print(f"Assigned Requests Count: {len(assigned_requests)}")
     for req in assigned_requests:
         print(f"Assigned - ID: {req.id}, Status: {req.service_status}")
@@ -355,14 +353,12 @@ def accept_request(request_id):
 
     service_request = ServiceRequest.query.get_or_404(request_id)
 
-    # Ensure the request is not already assigned
     if service_request.professional_id:
         flash('This request has already been assigned.')
         return redirect(url_for('view_requests'))
 
-    # Assign the request to the professional
     service_request.professional_id = current_user.id
-    service_request.service_status = 'accepted'  # Update the status appropriately
+    service_request.service_status = 'accepted'
     db.session.commit()
 
     flash('Service request accepted and assigned to you.')
@@ -397,12 +393,10 @@ def complete_request(request_id):
 
     service_request = ServiceRequest.query.get_or_404(request_id)
 
-    # Check if the current user is assigned to this request
     if service_request.professional_id != current_user.id:
         flash('You are not authorized to complete this service request.')
         return redirect(url_for('professional_dashboard'))
 
-    # Update the service request status
     service_request.service_status = 'completed'
     service_request.date_of_completion = datetime.utcnow()
     db.session.commit()
@@ -440,7 +434,6 @@ def search_services():
 
     if form.validate_on_submit():
         search_term = form.search_term.data
-        # Modify the query to filter based on the search term
         services = Service.query.filter(Service.name.ilike(f'%{search_term}%')).all()
 
     return render_template('search_services.html', services=services, form=form)

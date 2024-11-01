@@ -1,5 +1,3 @@
-# seed.py (run only once after initializing the database)
-
 from app import app
 from extensions import db
 from models import User, Service, ServiceRequest
