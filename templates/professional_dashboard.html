@@ -1,5 +1,3 @@
-<!-- templates/professional_dashboard.html -->
-
 {% extends 'base.html' %}
 
 {% block content %}
@@ -27,7 +25,6 @@
                 <td>{{ request.customer.username }}</td>
                 <td>{{ request.service_status.capitalize() }}</td>
                 <td>
-                    <!-- Display "Mark as Completed" button -->
                     <form action="{{ url_for('complete_request', request_id=request.id) }}" method="POST" style="display:inline;">
                         <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to mark this task as completed?');">Mark as Completed</button>
                     </form>
