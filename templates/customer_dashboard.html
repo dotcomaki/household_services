@@ -1,5 +1,3 @@
-<!-- templates/customer_dashboard.html -->
-
 {% extends 'base.html' %}
 
 {% block content %}
@@ -38,12 +36,10 @@
                 <td>{{ request.date_of_request.strftime('%Y-%m-%d %H:%M') }}</td>
                 <td>
                     {% if request.service_status in ['requested', 'accepted'] %}
-                    <!-- Display the Cancel button -->
                     <form action="{{ url_for('cancel_request', request_id=request.id) }}" method="POST" style="display:inline;">
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to cancel this request?');">Cancel</button>
                     </form>
                     {% else %}
-                    <!-- Display N/A or appropriate message -->
                     <span class="text-muted">N/A</span>
                     {% endif %}
                 </td>
