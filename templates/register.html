@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-4">
     <h2>Register</h2>
-    <form method="POST" action="{{ url_for('register') }}">
+    <form method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data">
         
         <!-- Role Field -->
         <div class="form-group">
@@ -81,6 +81,18 @@
                     </div>
                 {% endif %}
             </div>
+            <!-- Resume Upload Field -->
+            <div class="form-group">
+                {{ form.resume.label }}
+                {{ form.resume(class_="form-control-file") }}
+                {% if form.resume.errors %}
+                    <div class="text-danger">
+                        {% for error in form.resume.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
         </div>
         
         <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
@@ -97,8 +109,14 @@
         function toggleProfessionalFields() {
             if (roleSelect.value === 'professional') {
                 professionalFields.style.display = 'block';
+                document.getElementById('{{ form.resume.id }}').required = true;
+                document.getElementById('{{ form.service_type.id }}').required = true;
+                document.getElementById('{{ form.experience.id }}').required = true;
             } else {
                 professionalFields.style.display = 'none';
+                document.getElementById('{{ form.resume.id }}').required = false;
+                document.getElementById('{{ form.service_type.id }}').required = false;
+                document.getElementById('{{ form.experience.id }}').required = false;
             }
         }
 

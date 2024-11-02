@@ -1,14 +1,22 @@
 # Debug check
 print("routes.py is being imported")
 
-from typing import NotRequired
-from flask import render_template, redirect, url_for, flash, request
+from wtforms.validators import DataRequired, Optional
+from flask import render_template, redirect, url_for, flash, request, send_from_directory
 from app import app, db
 from datetime import datetime
 from forms import LoginForm, RegistrationForm, ServiceForm, ServiceRequestForm, SearchForm, EditUserForm
 from models import User, Service, ServiceRequest
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+import os
+
+ALLOWED_EXTENSIONS = {'pdf'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -31,9 +39,26 @@ def register():
         if form.role.data == 'professional':
             user.service_type = form.service_type.data
             user.experience = int(form.experience.data)
+            # Handle resume upload
+            if 'resume' not in request.files:
+                flash('No resume file part')
+                return redirect(request.url)
+            file = request.files['resume']
+            if file.filename == '':
+                flash('No selected resume file')
+                return redirect(request.url)
+            if form.resume.data:
+                filename = secure_filename(form.resume.data.filename)
+                unique_filename = f"{user.username}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{filename}"
+                form.resume.data.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+                user.resume_filename = unique_filename
+                user.approval_status = 'pending'
+            else:
+                flash('Invalid file type. Only PDF files are allowed.')
+                return redirect(request.url)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        flash('Registration successful. Your account is pending approval.')
         return redirect(url_for('login'))
     else:
         print('Form did not validate.')
@@ -60,11 +85,20 @@ def login():
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
             if user.role == 'professional':
-                return redirect(url_for('professional_dashboard'))
+                if user.approval_status == 'approved':
+                    login_user(user)
+                    return redirect(url_for('professional_dashboard'))
+                elif user.approval_status == 'blocked':
+                    flash('Your account has been blocked by the admin.')
+                    return redirect(url_for('index'))
+                else:
+                    flash('Your account is pending approval.')
+                    return redirect(url_for('index'))
             elif user.role == 'customer':
                 return redirect(url_for('customer_dashboard'))
         else:
             flash('Invalid username or password')
+        
     return render_template('login.html', form=form)
 
 # Logout Route
@@ -96,7 +130,8 @@ def admin_dashboard():
     services = Service.query.all()
     professionals = User.query.filter_by(role='professional').all()
     service_requests = ServiceRequest.query.all()
-    return render_template('admin_dashboard.html', services=services, professionals=professionals, service_requests=service_requests)
+    pending_professionals = User.query.filter_by(role='professional', approval_status='pending').all()
+    return render_template('admin_dashboard.html', services=services, professionals=professionals, service_requests=service_requests, pending_professionals=pending_professionals)
 
 # Create Service Route
 @app.route('/admin/create_service', methods=['GET', 'POST'])
@@ -138,14 +173,20 @@ def edit_user(user_id):
     form = EditUserForm(obj=user)
     
     if user.role == 'professional':
-        form.service_type.validators = [NotRequired()]
-        form.experience.validators = [NotRequired()]
+        # For professionals, these fields are required
+        form.service_type.validators = [DataRequired()]
+        form.experience.validators = [DataRequired()]
+    else:
+        # For customers, these fields are optional
+        form.service_type.validators = [Optional()]
+        form.experience.validators = [Optional()]
     
     if form.validate_on_submit():
         user.username = form.username.data
         if form.password.data:
             hashed_password = generate_password_hash(form.password.data)
             user.password = hashed_password
+        # Update professional-specific fields
         if user.role == 'professional':
             user.service_type = form.service_type.data
             user.experience = form.experience.data
@@ -212,6 +253,24 @@ def delete_service(service_id):
     flash('Service deleted successfully.')
     return redirect(url_for('admin_dashboard'))
 
+# Serve Resume Files
+@app.route('/view_resume/<filename>')
+@login_required
+def view_resume(filename):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+    
+    filename = secure_filename(filename)
+
+    resume_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    if not os.path.exists(resume_path):
+        flash('Resume file not found.')
+        return redirect(url_for('admin_dashboard'))
+
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 # Approve Professional Route
 @app.route('/admin/approve_professional/<int:professional_id>', methods=['POST'])
 @login_required
@@ -221,9 +280,9 @@ def approve_professional(professional_id):
         return redirect(url_for('index'))
 
     professional = User.query.get_or_404(professional_id)
-    professional.is_approved = True
+    professional.approval_status = 'approved'
     db.session.commit()
-    flash('Professional approved successfully.')
+    flash(f'Professional {professional.username} has been approved.')
     return redirect(url_for('admin_dashboard'))
 
 # Reject Professional Route
@@ -238,6 +297,20 @@ def reject_professional(professional_id):
     professional.is_approved = False
     db.session.commit()
     flash('Professional rejected.')
+    return redirect(url_for('admin_dashboard'))
+
+# Block Professional Route
+@app.route('/admin/block_professional/<int:professional_id>', methods=['POST'])
+@login_required
+def block_professional(professional_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    professional = User.query.get_or_404(professional_id)
+    professional.approval_status = 'blocked'
+    db.session.commit()
+    flash(f'Professional {professional.username} has been blocked.')
     return redirect(url_for('admin_dashboard'))
 
 # Delete Professional Route
@@ -296,8 +369,8 @@ def admin_summary():
 @app.route('/professional_dashboard')
 @login_required
 def professional_dashboard():
-    if current_user.role != 'professional':
-        flash('Access denied.')
+    if current_user.role != 'professional' or current_user.approval_status != 'approved':
+        flash('Access denied or account not approved.')
         return redirect(url_for('index'))
 
     # Define the statuses for assigned (open) tasks

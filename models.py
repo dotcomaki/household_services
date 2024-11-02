@@ -19,6 +19,8 @@ class User(UserMixin, db.Model):
     is_approved = db.Column(db.Boolean, default=False)
     service_type = db.Column(db.String(100))
     experience = db.Column(db.Integer)
+    resume_filename = db.Column(db.String(200))
+    approval_status = db.Column(db.String(50), default='pending')
 
     # DB Relationships
     customer_service_requests = db.relationship('ServiceRequest', backref='customer', foreign_keys='ServiceRequest.customer_id', lazy='dynamic')

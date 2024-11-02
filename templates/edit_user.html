@@ -42,11 +42,12 @@
     {% endif %}
 
     <form method="POST" action="{{ url_for('edit_user', user_id=user.id) }}">
+        {{ form.hidden_tag() }}
         
         <!-- Username Field -->
         <div class="form-group">
             {{ form.username.label }}
-            {{ form.username(class_='form-control') }}
+            {{ form.username(class_="form-control") }}
             {% if form.username.errors %}
                 <div class="text-danger">
                     {% for error in form.username.errors %}
@@ -55,11 +56,11 @@
                 </div>
             {% endif %}
         </div>
-
-        <!-- Password Field -->
+        
+        <!-- Password Fields -->
         <div class="form-group">
             {{ form.password.label }}
-            {{ form.password(class_='form-control') }}
+            {{ form.password(class_="form-control") }}
             {% if form.password.errors %}
                 <div class="text-danger">
                     {% for error in form.password.errors %}
@@ -68,33 +69,42 @@
                 </div>
             {% endif %}
         </div>
-
+        <div class="form-group">
+            {{ form.confirm_password.label }}
+            {{ form.confirm_password(class_="form-control") }}
+            {% if form.confirm_password.errors %}
+                <div class="text-danger">
+                    {% for error in form.confirm_password.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Professional-Specific Fields -->
         {% if user.role == 'professional' %}
-            <!-- Service Type Field -->
-            <div class="form-group">
-                {{ form.service_type.label }}
-                {{ form.service_type(class_='form-control') }}
-                {% if form.service_type.errors %}
-                    <div class="text-danger">
-                        {% for error in form.service_type.errors %}
-                            {{ error }}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- Experience Field -->
-            <div class="form-group">
-                {{ form.experience.label }}
-                {{ form.experience(class_='form-control') }}
-                {% if form.experience.errors %}
-                    <div class="text-danger">
-                        {% for error in form.experience.errors %}
-                            {{ error }}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
+        <div class="form-group">
+            {{ form.service_type.label }}
+            {{ form.service_type(class_="form-control") }}
+            {% if form.service_type.errors %}
+                <div class="text-danger">
+                    {% for error in form.service_type.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            {{ form.experience.label }}
+            {{ form.experience(class_="form-control") }}
+            {% if form.experience.errors %}
+                <div class="text-danger">
+                    {% for error in form.experience.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
 
             <!-- Approval Status Field -->
             <div class="form-group">

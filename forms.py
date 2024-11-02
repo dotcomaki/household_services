@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, IntegerField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, IntegerField, TextAreaField, BooleanField
 from wtforms.validators import DataRequired, Length, EqualTo, Optional, ValidationError, NumberRange
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 # Login Form
 class LoginForm(FlaskForm):
@@ -26,6 +27,7 @@ class RegistrationForm(FlaskForm):
     ], validators=[DataRequired(message='Please select a role.')])
     service_type = StringField('Service Type', validators=[Optional()])
     experience = StringField('Experience (years)', validators=[Optional()])
+    resume = FileField('Upload Resume (PDF only)', validators=[FileAllowed(['pdf'], 'PDF files only!')])
     submit = SubmitField('Register')
 
     def validate(self, extra_validators=None):
@@ -39,6 +41,9 @@ class RegistrationForm(FlaskForm):
                 return False
             if not self.experience.data:
                 self.experience.errors.append('Experience is required for professionals.')
+                return False
+            if not self.resume.data:
+                self.resume.errors.append('Resume is required for professionals.')
                 return False
             else:
                 try:
@@ -78,19 +83,10 @@ class ServiceRequestForm(FlaskForm):
 
 # Admin Edit User Form
 class EditUserForm(FlaskForm):
-    username = StringField('Username', validators=[
-        DataRequired(), Length(min=2, max=100)
-    ])
-    password = PasswordField('Password', validators=[
-        Optional(), Length(min=6)
-    ])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    password = PasswordField('New Password', validators=[Optional()])
+    confirm_password = PasswordField('Confirm Password', validators=[EqualTo('password', message='Passwords must match'), Optional()])
     service_type = StringField('Service Type', validators=[Optional()])
-    experience = IntegerField('Experience (years)', validators=[
-        Optional(),
-        NumberRange(min=0, message='Experience must be a positive number.')
-    ], filters=[lambda x: x or None])
-    is_approved = SelectField('Approval Status', choices=[
-        ('True', 'Approved'),
-        ('False', 'Not Approved')
-    ], validators=[Optional()])
-    submit = SubmitField('Save Changes')
+    experience = IntegerField('Experience (years)', validators=[Optional()])
+    is_approved = BooleanField('Approved', validators=[Optional()])
+    submit = SubmitField('Update')
