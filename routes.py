@@ -1,6 +1,3 @@
-# Debug check
-print("routes.py is being imported")
-
 from wtforms.validators import DataRequired, Optional
 from flask import render_template, redirect, url_for, flash, request, send_from_directory
 from app import app, db
