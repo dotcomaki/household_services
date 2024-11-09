@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired, Optional
 from flask import render_template, redirect, url_for, flash, request, send_from_directory
 from app import app, db
 from datetime import datetime
-from forms import LoginForm, RegistrationForm, ServiceForm, ServiceRequestForm, SearchForm, EditUserForm
+from forms import LoginForm, RegistrationForm, ServiceForm, ServiceRequestForm, SearchForm, EditUserForm, RatingForm
 from models import User, Service, ServiceRequest
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -131,7 +131,8 @@ def admin_dashboard():
     professionals = User.query.filter_by(role='professional').all()
     service_requests = ServiceRequest.query.all()
     pending_professionals = User.query.filter_by(role='professional', approval_status='pending').all()
-    return render_template('admin_dashboard.html', services=services, professionals=professionals, service_requests=service_requests, pending_professionals=pending_professionals)
+    rated_service_requests = ServiceRequest.query.filter(ServiceRequest.rating.isnot(None)).all()
+    return render_template('admin_dashboard.html', services=services, professionals=professionals, service_requests=service_requests, pending_professionals=pending_professionals, rated_service_requests=rated_service_requests)
 
 # Create Service Route
 @app.route('/admin/create_service', methods=['GET', 'POST'])
@@ -391,6 +392,20 @@ def professional_dashboard():
         ServiceRequest.service_status.in_(closed_statuses)
     ).all()
 
+    # Fetch ratings received
+    rated_requests = ServiceRequest.query.filter(
+        ServiceRequest.professional_id == current_user.id,
+        ServiceRequest.rating.isnot(None)
+    ).all()
+
+    # Calculate average rating
+    average_rating = db.session.query(db.func.avg(ServiceRequest.rating)).filter(
+        ServiceRequest.professional_id == current_user.id,
+        ServiceRequest.rating.isnot(None)
+    ).scalar()
+    if average_rating:
+        average_rating = round(average_rating, 2)
+
     # Debug Check
     print(f"Assigned Requests Count: {len(assigned_requests)}")
     for req in assigned_requests:
@@ -403,7 +418,9 @@ def professional_dashboard():
     return render_template(
         'professional_dashboard.html',
         assigned_requests=assigned_requests,
-        closed_requests=closed_requests
+        closed_requests=closed_requests,
+        rated_requests=rated_requests,
+        average_rating=average_rating
     )
 
 # Service Request Route
@@ -543,3 +560,35 @@ def cancel_request(request_id):
     db.session.commit()
     flash('Your service request has been cancelled successfully.')
     return redirect(url_for('customer_dashboard'))
+
+# Rate Professional Route
+@app.route('/submit_rating/<int:service_request_id>', methods=['GET', 'POST'])
+@login_required
+def submit_rating(service_request_id):
+    if current_user.role != 'customer':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    service_request = ServiceRequest.query.get_or_404(service_request_id)
+
+    if service_request.customer_id != current_user.id:
+        flash('You are not authorized to rate this service.')
+        return redirect(url_for('customer_dashboard'))
+
+    if service_request.service_status != 'completed':
+        flash('You can only rate completed services.')
+        return redirect(url_for('customer_dashboard'))
+
+    if service_request.rating is not None:
+        flash('You have already rated this service.')
+        return redirect(url_for('customer_dashboard'))
+
+    form = RatingForm()
+    if form.validate_on_submit():
+        service_request.rating = form.rating.data
+        service_request.remarks = form.remark.data
+        db.session.commit()
+        flash('Thank you for your feedback!')
+        return redirect(url_for('customer_dashboard'))
+
+    return render_template('submit_rating.html', form=form, service_request=service_request)

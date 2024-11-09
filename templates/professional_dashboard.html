@@ -6,6 +6,8 @@
     <hr>
     <a href="{{ url_for('view_requests') }}" class="btn btn-primary">View Available Service Requests</a>
 
+    <hr>
+
     <!-- Assigned Tasks Section -->
     <h2 class="mt-4">Assigned Tasks</h2>
     {% if assigned_requests %}
@@ -37,6 +39,8 @@
     <p>You have no assigned tasks at the moment.</p>
     {% endif %}
 
+    <hr>
+
     <!-- Closed Tasks Section -->
     <h2 class="mt-4">Closed Tasks</h2>
     {% if closed_requests %}
@@ -64,4 +68,39 @@
     <p>You have no closed tasks at the moment.</p>
     {% endif %}
 </div>
+
+<hr>
+
+<!-- Ratings Received -->
+<h3>Your Ratings and Remarks</h3>
+{% if average_rating %}
+<p><strong>Average Rating:</strong> {{ average_rating }} / 5</p>
+{% endif %}
+{% if rated_requests %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Service</th>
+            <th>Rating</th>
+            <th>Remark</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for request in rated_requests %}
+        <tr>
+            <td>{{ request.customer.username }}</td>
+            <td>{{ request.service.name }}</td>
+            <td>{{ request.rating }} / 5</td>
+            <td>{{ request.remarks or 'No remark' }}</td>
+            <td>{{ request.date_of_completion.strftime('%Y-%m-%d') if request.date_of_completion else '' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>You have not received any ratings yet.</p>
+{% endif %}
+
 {% endblock %}

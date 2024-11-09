@@ -90,3 +90,9 @@ class EditUserForm(FlaskForm):
     experience = IntegerField('Experience (years)', validators=[Optional()])
     is_approved = BooleanField('Approved', validators=[Optional()])
     submit = SubmitField('Update')
+
+# Rating Form
+class RatingForm(FlaskForm):
+    rating = IntegerField('Rating (1-5 Stars)', validators=[DataRequired(), NumberRange(min=1, max=5)])
+    remark = TextAreaField('Remark (Optional)')
+    submit = SubmitField('Submit Rating')

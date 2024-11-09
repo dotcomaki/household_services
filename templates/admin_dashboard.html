@@ -120,6 +120,37 @@
         </tbody>
     </table>
 
+    <hr>
+
+    <!-- Professional Ratings Section -->
+    <h3>Professional Ratings and Remarks</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Professional</th>
+                <th>Customer</th>
+                <th>Service</th>
+                <th>Rating</th>
+                <th>Remark</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in rated_service_requests %}
+            <tr>
+                <td>{{ request.professional.username }}</td>
+                <td>{{ request.customer.username }}</td>
+                <td>{{ request.service.name }}</td>
+                <td>{{ request.rating }} / 5</td>
+                <td>{{ request.remarks or 'No remark' }}</td>
+                <td>{{ request.date_of_completion.strftime('%Y-%m-%d') if request.date_of_completion else '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+
     <!-- Service Requests Table -->
     <h3>Service Requests</h3>
     <table class="table table-striped">

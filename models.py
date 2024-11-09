@@ -63,6 +63,7 @@ class ServiceRequest(db.Model):
     date_of_request = db.Column(db.DateTime, default=datetime.utcnow)
     date_of_completion = db.Column(db.DateTime)
     remarks = db.Column(db.Text)
+    rating = db.Column(db.Integer)
 
     def __repr__(self):
         return f'<ServiceRequest: {self.id}>'
