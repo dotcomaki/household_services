@@ -9,6 +9,9 @@
             <tr>
                 <th>Service Name</th>
                 <th>Customer</th>
+                <th>Contact Number</th>
+                <th>Location</th>
+                <th>Pin Code</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -18,6 +21,9 @@
             <tr>
                 <td>{{ request.service.name }}</td>
                 <td>{{ request.customer.username }}</td>
+                <td>{{ request.customer.contact_number }}</td>
+                <td>{{ request.customer.location }}</td>
+                <td>{{ request.customer.pin_code }}</td>
                 <td>{{ request.service_status }}</td>
                 <td>
                     {% if request.service_status == 'requested' %}

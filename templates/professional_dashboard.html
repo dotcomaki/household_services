@@ -16,6 +16,9 @@
             <tr>
                 <th>Service Name</th>
                 <th>Customer</th>
+                <th>Contact Number</th>
+                <th>Location</th>
+                <th>Pin Code</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -25,6 +28,9 @@
             <tr>
                 <td>{{ request.service.name }}</td>
                 <td>{{ request.customer.username }}</td>
+                <td>{{ request.customer.contact_number }}</td>
+                <td>{{ request.customer.location }}</td>
+                <td>{{ request.customer.pin_code }}</td>
                 <td>{{ request.service_status.capitalize() }}</td>
                 <td>
                     <form action="{{ url_for('complete_request', request_id=request.id) }}" method="POST" style="display:inline;">
@@ -59,7 +65,7 @@
                 <td>{{ request.service.name }}</td>
                 <td>{{ request.customer.username }}</td>
                 <td>{{ request.service_status.capitalize() }}</td>
-                <td>{{ request.date_completed.strftime('%Y-%m-%d %H:%M') if request.date_completed else 'N/A' }}</td>
+                <td>{{ request.date_of_completion.strftime('%Y-%m-%d') if request.date_of_completion else 'N/A' }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -94,7 +100,7 @@
             <td>{{ request.service.name }}</td>
             <td>{{ request.rating }} / 5</td>
             <td>{{ request.remarks or 'No remark' }}</td>
-            <td>{{ request.date_of_completion.strftime('%Y-%m-%d') if request.date_of_completion else '' }}</td>
+            <td>{{ request.date_of_completion.strftime('%Y-%m-%d') if request.date_of_completion else 'N/A' }}</td>
         </tr>
         {% endfor %}
     </tbody>

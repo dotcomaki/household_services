@@ -30,7 +30,10 @@ def register():
         user = User(
             username=form.username.data,
             password=hashed_password,
-            role=form.role.data
+            role=form.role.data,
+            contact_number=form.contact_number.data,
+            location=form.location.data,
+            pin_code=form.pin_code.data
         )
         # Handle professional specific fields
         if form.role.data == 'professional':
@@ -181,6 +184,9 @@ def edit_user(user_id):
     
     if form.validate_on_submit():
         user.username = form.username.data
+        user.contact_number = form.contact_number.data
+        user.location = form.location.data
+        user.pin_code = form.pin_code.data
         if form.password.data:
             hashed_password = generate_password_hash(form.password.data)
             user.password = hashed_password
@@ -403,6 +409,10 @@ def professional_dashboard():
     if average_rating:
         average_rating = round(average_rating, 2)
 
+    # For each assigned request, include the customer's information
+    for request in assigned_requests:
+        request.customer = User.query.get(request.customer_id)
+
     # Debug Check
     print(f"Assigned Requests Count: {len(assigned_requests)}")
     for req in assigned_requests:
@@ -506,6 +516,9 @@ def customer_dashboard():
         return redirect(url_for('index'))
 
     service_requests = ServiceRequest.query.filter_by(customer_id=current_user.id).order_by(ServiceRequest.id.desc()).all()
+    for request in service_requests:
+        if request.professional_id:
+            request.professional = User.query.get(request.professional_id)
     return render_template('customer_dashboard.html', service_requests=service_requests)
 
 # Search Service Route

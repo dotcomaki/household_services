@@ -81,6 +81,33 @@
             {% endif %}
         </div>
         
+        <!-- Contact Number -->
+        <div class="form-group">
+            {{ form.contact_number.label }}
+            {{ form.contact_number(class_="form-control") }}
+            {% for error in form.contact_number.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+            {{ form.location.label }}
+            {{ form.location(class_="form-control") }}
+            {% for error in form.location.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Pin Code -->
+        <div class="form-group">
+            {{ form.pin_code.label }}
+            {{ form.pin_code(class_="form-control") }}
+            {% for error in form.pin_code.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
         <!-- Professional-Specific Fields -->
         {% if user.role == 'professional' %}
         <div class="form-group">

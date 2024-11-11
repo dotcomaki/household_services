@@ -16,6 +16,9 @@
                 <th>Service</th>
                 <th>Professional</th>
                 <th>Status</th>
+                <th>Contact Number</th>
+                <th>Location</th>
+                <th>Pin Code</th>
                 <th>Date Requested</th>
                 <th>Actions</th>
                 <th>Rating</th>
@@ -34,6 +37,27 @@
                     {% endif %}
                 </td>
                 <td>{{ request.service_status.capitalize() }}</td>
+                <td>
+                    {% if request.professional %}
+                        {{ request.professional.contact_number }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if request.professional %}
+                        {{ request.professional.location }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if request.professional %}
+                        {{ request.professional.pin_code }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
                 <td>{{ request.date_of_request.strftime('%Y-%m-%d %H:%M') }}</td>
                 <td>
                     {% if request.service_status in ['requested', 'accepted'] %}

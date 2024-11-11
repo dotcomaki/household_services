@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, IntegerField, TextAreaField, BooleanField
-from wtforms.validators import DataRequired, Length, EqualTo, Optional, ValidationError, NumberRange
+from wtforms.validators import DataRequired, Length, EqualTo, Optional, ValidationError, NumberRange, Regexp
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 # Login Form
@@ -20,6 +20,15 @@ class RegistrationForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password', validators=[
         DataRequired(message='Please confirm your password.'),
         EqualTo('password', message='Passwords must match.')
+    ])
+    contact_number = StringField('Contact Number', validators=[
+        DataRequired(),
+        Regexp(r'^\+?\d{10,15}$', message='Enter a valid contact number.')
+    ])
+    location = StringField('Location', validators=[DataRequired(), Length(max=255)])
+    pin_code = StringField('Pin Code', validators=[
+        DataRequired(),
+        Regexp(r'^\d{4,10}$', message='Enter a valid pin code.')
     ])
     role = SelectField('Role', choices=[
         ('customer', 'Customer'),
@@ -86,6 +95,15 @@ class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     password = PasswordField('New Password', validators=[Optional()])
     confirm_password = PasswordField('Confirm Password', validators=[EqualTo('password', message='Passwords must match'), Optional()])
+    contact_number = StringField('Contact Number', validators=[
+        DataRequired(),
+        Regexp(r'^\+?\d{10,15}$', message='Enter a valid contact number.')
+    ])
+    location = StringField('Location', validators=[DataRequired(), Length(max=255)])
+    pin_code = StringField('Pin Code', validators=[
+        DataRequired(),
+        Regexp(r'^\d{4,10}$', message='Enter a valid pin code.')
+    ])
     service_type = StringField('Service Type', validators=[Optional()])
     experience = IntegerField('Experience (years)', validators=[Optional()])
     is_approved = BooleanField('Approved', validators=[Optional()])
