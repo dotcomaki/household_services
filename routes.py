@@ -754,3 +754,57 @@ def submit_rating(service_request_id):
         return redirect(url_for('customer_dashboard'))
 
     return render_template('submit_rating.html', form=form, service_request=service_request)
+
+# Customer Summary Route
+@app.route('/customer/summary')
+@login_required
+def customer_summary():
+    if current_user.role != 'customer':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    # Fetch service requests data for the current customer
+    total_completed = ServiceRequest.query.filter_by(
+        customer_id=current_user.id,
+        service_status='completed'
+    ).count()
+    total_assigned = ServiceRequest.query.filter(
+        ServiceRequest.customer_id == current_user.id,
+        ServiceRequest.service_status.in_(['accepted', 'in_progress'])
+    ).count()
+    total_cancelled = ServiceRequest.query.filter_by(
+        customer_id=current_user.id,
+        service_status='cancelled'
+    ).count()
+
+    # Handle cases where there is no data
+    if total_completed + total_assigned + total_cancelled == 0:
+        requests_base64 = None
+    else:
+        # Generate service requests bar chart
+        requests_fig, requests_ax = plt.subplots(figsize=(6, 6))
+        request_statuses = ['Completed', 'Assigned', 'Cancelled']
+        request_counts = [total_completed, total_assigned, total_cancelled]
+        colors = ['green', 'blue', 'red']
+
+        requests_ax.bar(request_statuses, request_counts, color=colors)
+        requests_ax.set_ylabel('Number of Requests')
+        requests_ax.set_xlabel('Request Status')
+        max_count = max(request_counts)
+        requests_ax.set_ylim(0, max_count * 1.2 if max_count > 0 else 1)
+
+        # Add value labels on top of bars
+        for index, value in enumerate(request_counts):
+            requests_ax.text(index, value + (max_count * 0.05 if max_count > 0 else 0.05), str(value), ha='center')
+
+        # Save requests chart to a BytesIO buffer
+        requests_png = BytesIO()
+        requests_fig.savefig(requests_png, format='png')
+        requests_png.seek(0)
+        requests_base64 = base64.b64encode(requests_png.getvalue()).decode('utf-8')
+        plt.close(requests_fig)
+
+    return render_template(
+        'customer_summary.html',
+        requests_chart=requests_base64
+    )
