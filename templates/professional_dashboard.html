@@ -2,9 +2,25 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1>Professional Dashboard</h1>
-    <hr>
-    <a href="{{ url_for('view_requests') }}" class="btn btn-primary">View Available Service Requests</a>
+    <div class="container mt-4">
+        <!-- Top Nav Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="{{ url_for('professional_dashboard') }}">Professional Dashboard</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item {% if request.endpoint == 'professional_dashboard' %}active{% endif %}">
+                        <a class="nav-link" href="{{ url_for('professional_dashboard') }}">Home</a>
+                    </li>
+                    <li class="nav-item {% if request.endpoint == 'professional_summary' %}active{% endif %}">
+                        <a class="nav-link" href="{{ url_for('professional_summary') }}">Summary</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
 
     <hr>
 
@@ -44,6 +60,8 @@
     {% else %}
     <p>You have no assigned tasks at the moment.</p>
     {% endif %}
+
+    <a href="{{ url_for('view_requests') }}" class="btn btn-primary">View Available Service Requests</a>
 
     <hr>
 

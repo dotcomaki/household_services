@@ -568,6 +568,91 @@ def complete_request(request_id):
     flash('Service request marked as completed.')
     return redirect(url_for('professional_dashboard'))
 
+# Professional Summary Route
+@app.route('/professional/summary')
+@login_required
+def professional_summary():
+    if current_user.role != 'professional':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+
+    # Fetch ratings data for the current professional
+    ratings_query = ServiceRequest.query.with_entities(ServiceRequest.rating).filter(
+        ServiceRequest.rating.isnot(None),
+        ServiceRequest.professional_id == current_user.id
+    )
+    rating_values = [r.rating for r in ratings_query]
+
+    # Count ratings for each star (1 to 5)
+    rating_counts = [rating_values.count(i) for i in range(1, 6)]
+
+    # Fetch service requests data for the current professional
+    total_completed = ServiceRequest.query.filter_by(
+        professional_id=current_user.id,
+        service_status='completed'
+    ).count()
+    total_assigned = ServiceRequest.query.filter(
+        ServiceRequest.professional_id == current_user.id,
+        ServiceRequest.service_status.in_(['accepted', 'in_progress'])
+    ).count()
+    total_cancelled = ServiceRequest.query.filter_by(
+        professional_id=current_user.id,
+        service_status='cancelled'
+    ).count()
+
+    # Handle cases where there is no data
+    # Ratings Chart
+    if sum(rating_counts) == 0:
+        ratings_base64 = None
+    else:
+        # Generate ratings pie chart
+        ratings_fig, ratings_ax = plt.subplots(figsize=(6, 6))
+        labels = ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars']
+        colors = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff']
+
+        ratings_ax.pie(rating_counts, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+        ratings_ax.axis('equal')
+
+        # Save ratings chart to a BytesIO buffer
+        ratings_png = BytesIO()
+        ratings_fig.savefig(ratings_png, format='png')
+        ratings_png.seek(0)
+        ratings_base64 = base64.b64encode(ratings_png.getvalue()).decode('utf-8')
+        plt.close(ratings_fig)
+
+    # Service Requests Chart
+    if total_completed + total_assigned + total_cancelled == 0:
+        requests_base64 = None
+    else:
+        # Generate service requests bar chart
+        requests_fig, requests_ax = plt.subplots(figsize=(6, 6))
+        request_statuses = ['Completed', 'Assigned', 'Cancelled']
+        request_counts = [total_completed, total_assigned, total_cancelled]
+        colors = ['green', 'blue', 'red']
+
+        requests_ax.bar(request_statuses, request_counts, color=colors)
+        requests_ax.set_ylabel('Number of Requests')
+        requests_ax.set_xlabel('Request Status')
+        max_count = max(request_counts)
+        requests_ax.set_ylim(0, max_count * 1.2 if max_count > 0 else 1)
+
+        # Add value labels on top of bars
+        for index, value in enumerate(request_counts):
+            requests_ax.text(index, value + (max_count * 0.05 if max_count > 0 else 0.05), str(value), ha='center')
+
+        # Save requests chart to a BytesIO buffer
+        requests_png = BytesIO()
+        requests_fig.savefig(requests_png, format='png')
+        requests_png.seek(0)
+        requests_base64 = base64.b64encode(requests_png.getvalue()).decode('utf-8')
+        plt.close(requests_fig)
+
+    return render_template(
+        'professional_summary.html',
+        ratings_chart=ratings_base64,
+        requests_chart=requests_base64
+    )
+
 
 
 ## CUSTOMER ROUTES ##
