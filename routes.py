@@ -8,6 +8,11 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
+from io import BytesIO
+import base64
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 ALLOWED_EXTENSIONS = {'pdf'}
 
@@ -369,7 +374,62 @@ def admin_summary():
     if current_user.role != 'admin':
         flash('Access denied.')
         return redirect(url_for('index'))
-    return render_template('admin_summary.html')
+    
+    # Fetch ratings data
+    ratings_query = ServiceRequest.query.with_entities(ServiceRequest.rating).filter(ServiceRequest.rating.isnot(None))
+    rating_values = [r.rating for r in ratings_query]
+    
+    # Count ratings for each star (1 to 5)
+    rating_counts = [rating_values.count(i) for i in range(1, 6)]
+    
+    # Fetch service requests data
+    total_completed = ServiceRequest.query.filter_by(service_status='completed').count()
+    total_assigned = ServiceRequest.query.filter(ServiceRequest.service_status.in_(['accepted', 'in_progress'])).count()
+    total_cancelled = ServiceRequest.query.filter_by(service_status='cancelled').count()
+    
+    # Generate charts using Matplotlib
+    # 1. Overall Customer Ratings Pie Chart
+    ratings_fig, ratings_ax = plt.subplots(figsize=(6, 6))
+    labels = ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars']
+    colors = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff']
+    
+    ratings_ax.pie(rating_counts, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+    ratings_ax.axis('equal')
+    
+    # Save ratings chart to a BytesIO buffer
+    ratings_png = BytesIO()
+    ratings_fig.savefig(ratings_png, format='png')
+    ratings_png.seek(0)
+    ratings_base64 = base64.b64encode(ratings_png.getvalue()).decode('utf-8')
+    plt.close(ratings_fig)
+    
+    # 2. Service Requests Summary Bar Chart
+    requests_fig, requests_ax = plt.subplots(figsize=(6, 6))
+    request_statuses = ['Completed', 'Assigned', 'Cancelled']
+    request_counts = [total_completed, total_assigned, total_cancelled]
+    colors = ['green', 'blue', 'red']
+    
+    requests_ax.bar(request_statuses, request_counts, color=colors)
+    requests_ax.set_ylabel('Number of Requests')
+    requests_ax.set_xlabel('Request Status')
+    requests_ax.set_ylim(0, max(request_counts) * 1.2)
+    
+    # Add value labels on top of bars
+    for index, value in enumerate(request_counts):
+        requests_ax.text(index, value + (max(request_counts) * 0.05), str(value), ha='center')
+    
+    # Save requests chart to a BytesIO buffer
+    requests_png = BytesIO()
+    requests_fig.savefig(requests_png, format='png')
+    requests_png.seek(0)
+    requests_base64 = base64.b64encode(requests_png.getvalue()).decode('utf-8')
+    plt.close(requests_fig)
+    
+    return render_template(
+        'admin_summary.html',
+        ratings_chart=ratings_base64,
+        requests_chart=requests_base64
+    )
 
 
 ## PROFESSIONAL ROUTES ##

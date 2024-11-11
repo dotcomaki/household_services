@@ -27,6 +27,17 @@
         </div>
     </nav>
     <hr>
-    <p>This is the summary page. Content will be added here later.</p>
+
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Overall Customer Ratings</h3>
+            <img src="data:image/png;base64,{{ ratings_chart }}" alt="Ratings Chart" class="img-fluid">
+        </div>
+        <div class="col-md-6">
+            <h3>Service Requests Summary</h3>
+            <img src="data:image/png;base64,{{ requests_chart }}" alt="Requests Chart" class="img-fluid">
+        </div>
+    </div>
 </div>
 {% endblock %}
