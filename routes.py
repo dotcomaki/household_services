@@ -25,6 +25,8 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegistrationForm()
+    services = Service.query.all()
+    form.service_type.choices = [(service.name, service.name) for service in services]
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)
         user = User(
@@ -172,6 +174,9 @@ def manage_users():
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)
     form = EditUserForm(obj=user)
+
+    services = Service.query.all()
+    form.service_type.choices = [(service.name, service.name) for service in services]
     
     if user.role == 'professional':
         # For professionals, these fields are required
@@ -199,6 +204,8 @@ def edit_user(user_id):
         flash('User updated successfully.')
         return redirect(url_for('admin_dashboard'))
     
+    form.is_approved.data = (user.approval_status == 'approved')
+
     return render_template('edit_user.html', form=form, user=user)
 
 # Delete User Route

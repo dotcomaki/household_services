@@ -34,7 +34,7 @@ class RegistrationForm(FlaskForm):
         ('customer', 'Customer'),
         ('professional', 'Professional')
     ], validators=[DataRequired(message='Please select a role.')])
-    service_type = StringField('Service Type', validators=[Optional()])
+    service_type = SelectField('Service Type', choices=[], validators=[Optional()])
     experience = StringField('Experience (years)', validators=[Optional()])
     resume = FileField('Upload Resume (PDF only)', validators=[FileAllowed(['pdf'], 'PDF files only!')])
     submit = SubmitField('Register')
@@ -104,7 +104,7 @@ class EditUserForm(FlaskForm):
         DataRequired(),
         Regexp(r'^\d{4,10}$', message='Enter a valid pin code.')
     ])
-    service_type = StringField('Service Type', validators=[Optional()])
+    service_type = SelectField('Service Type', choices=[], validators=[Optional()])
     experience = IntegerField('Experience (years)', validators=[Optional()])
     is_approved = BooleanField('Approved', validators=[Optional()])
     submit = SubmitField('Update')
