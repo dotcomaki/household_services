@@ -65,7 +65,7 @@ class RegistrationForm(FlaskForm):
                     return False
         return True
 
-    # Existing User Function
+    # Existing Username Error Catch
     def validate_username(self, username):
         from models import User
         user = User.query.filter_by(username=username.data).first()

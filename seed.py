@@ -1,3 +1,5 @@
+# RUN ONLY ONCE IN THE BEGINNING TO SEED DATABASE WITH SAMPLE DATA
+
 from app import app
 from extensions import db
 from models import User, Service, ServiceRequest

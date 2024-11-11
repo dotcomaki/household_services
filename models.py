@@ -45,7 +45,7 @@ class Service(db.Model):
     id = db.Column(db.Integer, nullable =False, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     base_price = db.Column(db.Float, nullable=False)
-    time_required = db.Column(db.Integer, nullable=False)  # in minutes
+    time_required = db.Column(db.Integer, nullable=False)
     description = db.Column(db.Text)
         
     def __repr__(self):

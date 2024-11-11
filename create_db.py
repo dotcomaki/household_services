@@ -1,3 +1,4 @@
+# RUN ONLY ONCE IN THE BEGINNING TO CREATE DATABASE TABLES
 from app import app
 from extensions import db
 import models

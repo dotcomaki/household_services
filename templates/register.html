@@ -108,6 +108,7 @@
                     </div>
                 {% endif %}
             </div>
+
             <!-- Resume Upload Field -->
             <div class="form-group">
                 {{ form.resume.label }}
@@ -146,7 +147,6 @@
                 document.getElementById('{{ form.experience.id }}').required = false;
             }
         }
-
         roleSelect.addEventListener('change', toggleProfessionalFields);
         toggleProfessionalFields();
     });
