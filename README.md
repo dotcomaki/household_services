@@ -1,4 +1,4 @@
-# Household Services Application
+# Suburb Services
 
 This project manages household services. It is my sophomore year project for MAD-1 at IIT Madras. Built entirely on Flask and Jinja2.
 
@@ -6,7 +6,6 @@ This project manages household services. It is my sophomore year project for MAD
 
 - Python
 - Flask
-- PostgreSQL
 - SQLAlchemy
 
 ## Installation
