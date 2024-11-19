@@ -53,10 +53,16 @@ This project manages household services. It is my sophomore year project for MAD
 
 ## Running the Application
 
-Start the Flask development server:
+1. Initialize Python Virtualenv
 
-```bash
-flask run
-```
+    ```py
+    source venv/bin/activate
+    ```
+
+2. Start the Flask development server:
+
+    ```bash
+    flask run
+    ```
 
 Access the application at `http://localhost:5000`.
