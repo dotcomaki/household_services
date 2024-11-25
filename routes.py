@@ -215,6 +215,10 @@ def delete_user(user_id):
         flash('Access denied.')
         return redirect(url_for('index'))
     user = User.query.get_or_404(user_id)
+
+    ServiceRequest.query.filter_by(customer_id=user.id).update({ServiceRequest.customer_id: None})
+    ServiceRequest.query.filter_by(professional_id=user.id).update({ServiceRequest.professional_id: None})
+
     db.session.delete(user)
     db.session.commit()
     flash('User deleted successfully.')

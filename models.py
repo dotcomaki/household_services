@@ -57,8 +57,8 @@ class ServiceRequest(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=False)
-    customer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    professional_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    customer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    professional_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     service_status = db.Column(db.String(20), nullable=False, default='requested')
 
     # DB Relationships
