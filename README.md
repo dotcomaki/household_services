@@ -1,10 +1,10 @@
 # Suburb Services
 
-This project manages household services. It is my sophomore year project for MAD-1 at IIT Madras. Built entirely on Flask and Jinja2.
+Suburb Services is a modern professional services platform where users and professionals can foster an environment of moderated and industry-grade professional work, ranging from house help to advanced technical assistance. It is my sophomore year project for Modern Application Development-1 at IIT Madras. Built entirely with Flask and Jinja2.
 
 ## Prerequisites
 
-- Python
+- Python (latest version)
 - Flask
 - SQLAlchemy
 
