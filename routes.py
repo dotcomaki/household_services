@@ -730,3 +730,16 @@ def customer_summary():
         'customer_summary.html',
         requests_chart=requests_base64
     )
+
+# Edit Service Route
+@app.route('/edit_service_request/<int:request_id>', methods=['POST'])
+def edit_service_request(request_id):
+    service_request = ServiceRequest.query.get_or_404(request_id)
+    
+    # Update service request based on form data
+    service_request.service_status = request.form['status']
+    service_request.remark = request.form['remark']
+    
+    db.session.commit()
+    flash("Service request updated successfully!", "success")
+    return redirect(url_for('customer_dashboard'))
