@@ -262,6 +262,19 @@ def delete_service(service_id):
     flash('Service deleted successfully.')
     return redirect(url_for('admin_dashboard'))
 
+# Delete Service Request Route
+@app.route('/delete_service_request/<int:request_id>', methods=['POST'])
+@login_required
+def delete_service_request(request_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+    service_request = ServiceRequest.query.get_or_404(request_id)
+    db.session.delete(service_request)
+    db.session.commit()
+    flash('Service request deleted successfully.')
+    return redirect(url_for('admin_dashboard'))
+
 # Serve Resume Files
 @app.route('/view_resume/<filename>')
 @login_required
@@ -287,6 +300,20 @@ def approve_professional(professional_id):
     professional.approval_status = 'approved'
     db.session.commit()
     flash(f'Professional {professional.username} has been approved.')
+    return redirect(url_for('admin_dashboard'))
+
+# Approve All Professionals Route
+@app.route('/admin/approve_all_professionals/', methods=['POST'])
+@login_required
+def approve_all_professionals():
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+    pending_professionals = User.query.filter_by(role='professional', approval_status='pending').all()
+    for professional in pending_professionals:
+        professional.approval_status = 'approved'
+    db.session.commit()
+    flash(f'All pending professionals have been approved.')
     return redirect(url_for('admin_dashboard'))
 
 # Reject Professional Route
@@ -730,3 +757,16 @@ def customer_summary():
         'customer_summary.html',
         requests_chart=requests_base64
     )
+
+# Edit Service Route
+@app.route('/edit_service_request/<int:request_id>', methods=['POST'])
+def edit_service_request(request_id):
+    service_request = ServiceRequest.query.get_or_404(request_id)
+    
+    # Update service request based on form data
+    service_request.service_status = request.form['status']
+    service_request.remark = request.form['remark']
+    
+    db.session.commit()
+    flash("Service request updated successfully!", "success")
+    return redirect(url_for('customer_dashboard'))
