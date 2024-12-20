@@ -289,6 +289,20 @@ def approve_professional(professional_id):
     flash(f'Professional {professional.username} has been approved.')
     return redirect(url_for('admin_dashboard'))
 
+# Approve All Professionals Route
+@app.route('/admin/approve_all_professionals/', methods=['POST'])
+@login_required
+def approve_all_professionals():
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+    pending_professionals = User.query.filter_by(role='professional', approval_status='pending').all()
+    for professional in pending_professionals:
+        professional.approval_status = 'approved'
+    db.session.commit()
+    flash(f'All pending professionals have been approved.')
+    return redirect(url_for('admin_dashboard'))
+
 # Reject Professional Route
 @app.route('/admin/reject_professional/<int:professional_id>', methods=['POST'])
 @login_required

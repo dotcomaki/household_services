@@ -118,6 +118,9 @@
             {% endfor %}
         </tbody>
     </table>
+    <form action="{{ url_for('approve_all_professionals') }}" method="POST" style="display:inline;">
+        <button type="submit" class="btn btn-sm btn-success">Approve All</button>
+    </form>
     <hr>
 
     <!-- Professional Ratings Section -->
