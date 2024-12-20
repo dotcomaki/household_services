@@ -262,6 +262,19 @@ def delete_service(service_id):
     flash('Service deleted successfully.')
     return redirect(url_for('admin_dashboard'))
 
+# Delete Service Request Route
+@app.route('/delete_service_request/<int:request_id>', methods=['POST'])
+@login_required
+def delete_service_request(request_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('index'))
+    service_request = ServiceRequest.query.get_or_404(request_id)
+    db.session.delete(service_request)
+    db.session.commit()
+    flash('Service request deleted successfully.')
+    return redirect(url_for('admin_dashboard'))
+
 # Serve Resume Files
 @app.route('/view_resume/<filename>')
 @login_required

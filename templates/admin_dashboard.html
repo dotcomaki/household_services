@@ -160,6 +160,7 @@
                 <th>Assigned Professional</th>
                 <th>Requested Date</th>
                 <th>Status</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -175,6 +176,11 @@
                 </td>
                 <td>{{ request.date_of_request.strftime('%Y-%m-%d') }}</td>
                 <td>{{ request.service_status.capitalize() }}</td>
+                <td>
+                    <form action="{{ url_for('delete_service_request', request_id=request.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete service request</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
