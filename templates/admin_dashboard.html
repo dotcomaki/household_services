@@ -9,6 +9,7 @@
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
@@ -58,6 +59,7 @@
                 {% endfor %}
             </tbody>
         </table>
+
         <div class="text-right">
             <a href="{{ url_for('create_service') }}" class="btn btn-primary mt-3">Create Service</a>
         </div>
@@ -118,6 +120,7 @@
             {% endfor %}
         </tbody>
     </table>
+    
     <form action="{{ url_for('approve_all_professionals') }}" method="POST" style="display:inline;">
         <button type="submit" class="btn btn-sm btn-success">Approve All</button>
     </form>
