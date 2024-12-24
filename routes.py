@@ -7,12 +7,12 @@ from models import User, Service, ServiceRequest
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-import os
-from io import BytesIO
-import base64
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+matplotlib.use('Agg')
+from io import BytesIO
+import os
+import base64
 
 ALLOWED_EXTENSIONS = {'pdf'}
 
@@ -42,7 +42,7 @@ def register():
             location=form.location.data,
             pin_code=form.pin_code.data
         )
-        # Handle professional specific fields
+        # Handle professional Specific Fields
         if form.role.data == 'professional':
             user.service_type = form.service_type.data
             user.experience = int(form.experience.data)
@@ -85,7 +85,6 @@ def login():
                 db.session.commit()
             login_user(user)
             return redirect(url_for('admin_dashboard'))
-        
         # Customer or Professional Login
         user = User.query.filter_by(username=form.username.data).first()
         if user and check_password_hash(user.password, form.password.data):
@@ -104,7 +103,6 @@ def login():
                 return redirect(url_for('customer_dashboard'))
         else:
             flash('Invalid username or password')
-        
     return render_template('login.html', form=form)
 
 # Logout Route
@@ -180,14 +178,12 @@ def edit_user(user_id):
     services = Service.query.all()
     form.service_type.choices = [(service.name, service.name) for service in services]
     if user.role == 'professional':
-        # For professionals, these fields are required
+        # Required fields for professionals
         form.service_type.validators = [DataRequired()]
         form.experience.validators = [DataRequired()]
     else:
-        # For customers, these fields are optional (even if they show up in the form, they normally shouldn't)
         form.service_type.validators = [Optional()]
         form.experience.validators = [Optional()]
-    
     if form.validate_on_submit():
         user.username = form.username.data
         user.contact_number = form.contact_number.data
@@ -196,7 +192,7 @@ def edit_user(user_id):
         if form.password.data:
             hashed_password = generate_password_hash(form.password.data)
             user.password = hashed_password
-        # Update professional-specific fields
+        # Update Professional Specific Fields
         if user.role == 'professional':
             user.service_type = form.service_type.data
             user.experience = form.experience.data
@@ -215,10 +211,8 @@ def delete_user(user_id):
         flash('Access denied.')
         return redirect(url_for('index'))
     user = User.query.get_or_404(user_id)
-
     ServiceRequest.query.filter_by(customer_id=user.id).update({ServiceRequest.customer_id: None})
     ServiceRequest.query.filter_by(professional_id=user.id).update({ServiceRequest.professional_id: None})
-
     db.session.delete(user)
     db.session.commit()
     flash('User deleted successfully.')
@@ -233,7 +227,6 @@ def edit_service(service_id):
         return redirect(url_for('index'))
     service = Service.query.get_or_404(service_id)
     form = ServiceForm(obj=service)
-
     if form.validate_on_submit():
         service.name = form.name.data
         service.base_price = form.base_price.data
@@ -242,7 +235,6 @@ def edit_service(service_id):
         db.session.commit()
         flash('Service updated successfully.')
         return redirect(url_for('admin_dashboard'))
-
     return render_template('edit_service.html', form=form, service=service)
 
 # Delete Service Route
@@ -394,8 +386,6 @@ def admin_summary():
     total_completed = ServiceRequest.query.filter_by(service_status='completed').count()
     total_assigned = ServiceRequest.query.filter(ServiceRequest.service_status.in_(['accepted', 'in_progress'])).count()
     total_cancelled = ServiceRequest.query.filter_by(service_status='cancelled').count()
-    
-    # Generate charts using Matplotlib
     # 1. Overall Customer Ratings Pie Chart
     ratings_fig, ratings_ax = plt.subplots(figsize=(6, 6))
     labels = ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars']
@@ -426,7 +416,6 @@ def admin_summary():
     requests_png.seek(0)
     requests_base64 = base64.b64encode(requests_png.getvalue()).decode('utf-8')
     plt.close(requests_fig)
-    
     return render_template(
         'admin_summary.html',
         ratings_chart=ratings_base64,
@@ -468,16 +457,6 @@ def professional_dashboard():
         average_rating = round(average_rating, 2)
     for request in assigned_requests:
         request.customer = User.query.get(request.customer_id)
-
-    # Debug Check (remove when final)
-    print(f"Assigned Requests Count: {len(assigned_requests)}")
-    for req in assigned_requests:
-        print(f"Assigned - ID: {req.id}, Status: {req.service_status}")
-
-    print(f"Closed Requests Count: {len(closed_requests)}")
-    for req in closed_requests:
-        print(f"Closed - ID: {req.id}, Status: {req.service_status}")
-
     return render_template(
         'professional_dashboard.html',
         assigned_requests=assigned_requests,
@@ -544,7 +523,6 @@ def complete_request(request_id):
     service_request.service_status = 'completed'
     service_request.date_of_completion = datetime.utcnow()
     db.session.commit()
-
     flash('Service request marked as completed.')
     return redirect(url_for('professional_dashboard'))
 
@@ -614,7 +592,6 @@ def professional_summary():
         requests_png.seek(0)
         requests_base64 = base64.b64encode(requests_png.getvalue()).decode('utf-8')
         plt.close(requests_fig)
-
     return render_template(
         'professional_summary.html',
         ratings_chart=ratings_base64,
@@ -758,15 +735,13 @@ def customer_summary():
         requests_chart=requests_base64
     )
 
-# Edit Service Route
+# Edit Service Request Route
 @app.route('/edit_service_request/<int:request_id>', methods=['POST'])
 def edit_service_request(request_id):
     service_request = ServiceRequest.query.get_or_404(request_id)
-    
     # Update service request based on form data
     service_request.service_status = request.form['status']
     service_request.remark = request.form['remark']
-    
     db.session.commit()
     flash("Service request updated successfully!", "success")
     return redirect(url_for('customer_dashboard'))

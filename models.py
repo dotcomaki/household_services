@@ -18,7 +18,7 @@ class User(UserMixin, db.Model):
     location = db.Column(db.String(255), nullable=True)
     pin_code = db.Column(db.String(10), nullable=True)
 
-    # For Professionals Only
+    # Professionals Specific Fields
     is_approved = db.Column(db.Boolean, default=False)
     service_type = db.Column(db.String(100))
     experience = db.Column(db.Integer)
