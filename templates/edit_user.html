@@ -1,154 +1,156 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- Top Nav Bar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-            <li class="nav-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
-                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Home</a>
-            </li>
-            <li class="nav-item {% if request.endpoint == 'admin_search' %}active{% endif %}">
-                <a class="nav-link" href="{{ url_for('admin_search') }}">Search</a>
-            </li>
-            <li class="nav-item {% if request.endpoint == 'manage_users' %}active{% endif %}">
-                <a class="nav-link" href="{{ url_for('manage_users') }}">Manage All Users</a>
-            </li>
-            <li class="nav-item {% if request.endpoint == 'admin_summary' %}active{% endif %}">
-                <a class="nav-link" href="{{ url_for('admin_summary') }}">Summary</a>
-            </li>
-        </ul>
-    </div>
-</nav>
-<hr>
 <div class="container mt-4">
-    <h2>Edit User</h2>
-
-    {% if form.errors %}
-        <div class="alert alert-danger">
-            <ul>
-            {% for field_errors in form.errors.values() %}
-                {% for error in field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            {% endfor %}
+    <!-- Top Nav Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Home</a>
+                </li>
+                <li class="nav-item {% if request.endpoint == 'admin_search' %}active{% endif %}">
+                    <a class="nav-link" href="{{ url_for('admin_search') }}">Search</a>
+                </li>
+                <li class="nav-item {% if request.endpoint == 'manage_users' %}active{% endif %}">
+                    <a class="nav-link" href="{{ url_for('manage_users') }}">Manage All Users</a>
+                </li>
+                <li class="nav-item {% if request.endpoint == 'admin_summary' %}active{% endif %}">
+                    <a class="nav-link" href="{{ url_for('admin_summary') }}">Summary</a>
+                </li>
             </ul>
         </div>
-    {% endif %}
+    </nav>
+    <hr>
+    <div class="container mt-4">
+        <h2>Edit User</h2>
 
-    <form method="POST" action="{{ url_for('edit_user', user_id=user.id) }}">
-        {{ form.hidden_tag() }}
-        
-        <!-- Username Field -->
-        <div class="form-group">
-            {{ form.username.label }}
-            {{ form.username(class_="form-control") }}
-            {% if form.username.errors %}
-                <div class="text-danger">
-                    {% for error in form.username.errors %}
-                        {{ error }}
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                {% for field_errors in form.errors.values() %}
+                    {% for error in field_errors %}
+                        <li>{{ error }}</li>
                     {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-        
-        <!-- Password Fields -->
-        <div class="form-group">
-            {{ form.password.label }}
-            {{ form.password(class_="form-control") }}
-            {% if form.password.errors %}
-                <div class="text-danger">
-                    {% for error in form.password.errors %}
-                        {{ error }}
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-        <div class="form-group">
-            {{ form.confirm_password.label }}
-            {{ form.confirm_password(class_="form-control") }}
-            {% if form.confirm_password.errors %}
-                <div class="text-danger">
-                    {% for error in form.confirm_password.errors %}
-                        {{ error }}
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-        
-        <!-- Contact Number -->
-        <div class="form-group">
-            {{ form.contact_number.label }}
-            {{ form.contact_number(class_="form-control") }}
-            {% for error in form.contact_number.errors %}
-                <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
+                {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
 
-        <!-- Location -->
-        <div class="form-group">
-            {{ form.location.label }}
-            {{ form.location(class_="form-control") }}
-            {% for error in form.location.errors %}
-                <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
-
-        <!-- Pin Code -->
-        <div class="form-group">
-            {{ form.pin_code.label }}
-            {{ form.pin_code(class_="form-control") }}
-            {% for error in form.pin_code.errors %}
-                <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
-
-        <!-- Professional-Specific Fields -->
-        {% if user.role == 'professional' %}
-        <div class="form-group">
-            {{ form.service_type.label }}
-            {{ form.service_type(class_="form-control") }}
-            {% if form.service_type.errors %}
-                <div class="text-danger">
-                    {% for error in form.service_type.errors %}
-                        {{ error }}
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-        <div class="form-group">
-            {{ form.experience.label }}
-            {{ form.experience(class_="form-control") }}
-            {% if form.experience.errors %}
-                <div class="text-danger">
-                    {% for error in form.experience.errors %}
-                        {{ error }}
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-            <!-- Approval Status Field -->
+        <form method="POST" action="{{ url_for('edit_user', user_id=user.id) }}">
+            {{ form.hidden_tag() }}
+            
+            <!-- Username Field -->
             <div class="form-group">
-                {{ form.is_approved.label }}
-                {{ form.is_approved(class_='form-control') }}
-                {% if form.is_approved.errors %}
+                {{ form.username.label }}
+                {{ form.username(class_="form-control") }}
+                {% if form.username.errors %}
                     <div class="text-danger">
-                        {% for error in form.is_approved.errors %}
+                        {% for error in form.username.errors %}
                             {{ error }}
                         {% endfor %}
                     </div>
                 {% endif %}
             </div>
-        {% endif %}
+            
+            <!-- Password Fields -->
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(class_="form-control") }}
+                {% if form.password.errors %}
+                    <div class="text-danger">
+                        {% for error in form.password.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.confirm_password.label }}
+                {{ form.confirm_password(class_="form-control") }}
+                {% if form.confirm_password.errors %}
+                    <div class="text-danger">
+                        {% for error in form.confirm_password.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Contact Number -->
+            <div class="form-group">
+                {{ form.contact_number.label }}
+                {{ form.contact_number(class_="form-control") }}
+                {% for error in form.contact_number.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
 
-        <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
-    </form>
+            <!-- Location -->
+            <div class="form-group">
+                {{ form.location.label }}
+                {{ form.location(class_="form-control") }}
+                {% for error in form.location.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Pin Code -->
+            <div class="form-group">
+                {{ form.pin_code.label }}
+                {{ form.pin_code(class_="form-control") }}
+                {% for error in form.pin_code.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Professional-Specific Fields -->
+            {% if user.role == 'professional' %}
+            <div class="form-group">
+                {{ form.service_type.label }}
+                {{ form.service_type(class_="form-control") }}
+                {% if form.service_type.errors %}
+                    <div class="text-danger">
+                        {% for error in form.service_type.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.experience.label }}
+                {{ form.experience(class_="form-control") }}
+                {% if form.experience.errors %}
+                    <div class="text-danger">
+                        {% for error in form.experience.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+                <!-- Approval Status Field -->
+                <div class="form-group">
+                    {{ form.is_approved.label }}
+                    {{ form.is_approved(class_='form-control') }}
+                    {% if form.is_approved.errors %}
+                        <div class="text-danger">
+                            {% for error in form.is_approved.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
 </div>
 {% endblock %}
